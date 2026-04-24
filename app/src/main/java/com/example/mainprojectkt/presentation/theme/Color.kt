@@ -1,4 +1,4 @@
-package com.example.mainprojectkt.ui.theme
+package com.example.mainprojectkt.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
