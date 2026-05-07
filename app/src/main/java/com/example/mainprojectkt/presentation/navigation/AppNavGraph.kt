@@ -29,7 +29,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             ) {backStackEntry ->
             val number = backStackEntry.arguments?.getInt("number") ?: return@composable
             val text = viewModel.getText(number)
-            BAPageScreen(number, text)
+            BAPageScreen(number, text, {back -> navController.navigate("page/${number+back}")
+            })
         }
         composable("pdf") {
             DocumentViewer(
