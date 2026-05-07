@@ -1,6 +1,12 @@
 package com.example.mainprojectkt.data.local
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import com.itextpdf.text.pdf.PdfReader
+import com.itextpdf.text.pdf.parser.PdfTextExtractor
+import java.io.File
+import java.net.URI
 
 class BADataSource(val context: Context) {
     val text = "Раздвинули бостонные столы, составились партии, и гости графа разместились в двух гостиных, диванной и библиотеке.\n" +
@@ -59,5 +65,11 @@ class BADataSource(val context: Context) {
         if (number == 1)
             return text
         return "There is no text yet"
+    }
+
+    fun getTextUri(uri: Uri, number: Int): String{
+        Log.d("TAG", "!")
+        val pdfReader = PdfReader(context.contentResolver.openInputStream(uri))
+        return PdfTextExtractor.getTextFromPage(pdfReader, number)
     }
 }

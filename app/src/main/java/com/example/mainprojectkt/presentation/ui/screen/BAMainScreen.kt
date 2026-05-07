@@ -12,7 +12,8 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun BAMainScreen(
-    onClick: (Int) -> Unit
+    onClick: (Int) -> Unit,
+    toPdf: () -> Unit
 ){
     var number by remember { mutableStateOf("") }
     Column() {
@@ -20,6 +21,9 @@ fun BAMainScreen(
         TextField(number, { number = it })
         Button(onClick = { onClick(number.toInt()) }) {
             Text("Страница")
+        }
+        Button(onClick = toPdf) {
+            Text("PDF")
         }
     }
 }

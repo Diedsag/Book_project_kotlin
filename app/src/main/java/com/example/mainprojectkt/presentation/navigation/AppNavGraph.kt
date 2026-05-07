@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
+import com.example.mainprojectkt.presentation.ui.screen.DocumentViewer
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 @Composable
@@ -18,7 +19,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
-                {number -> navController.navigate("page/$number")}
+                {number -> navController.navigate("page/$number")},
+                {navController.navigate("pdf")}
             )
         }
         composable(
@@ -28,6 +30,12 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             val number = backStackEntry.arguments?.getInt("number") ?: return@composable
             val text = viewModel.getText(number)
             BAPageScreen(number, text)
+        }
+        composable("pdf") {
+            DocumentViewer(
+                viewModel::changeUri,
+                {navController.navigate("home")}
+            )
         }
     }
 }
