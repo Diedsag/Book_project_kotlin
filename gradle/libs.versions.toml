@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.2"
+itext7Core = "9.6.0"
 itextg = "5.5.10"
 kotlin = "2.0.21"
 coreKtx = "1.18.0"
@@ -15,6 +16,7 @@ navigationCompose = "2.9.8"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7Core" }
 itextg = { module = "com.itextpdf:itextg", version.ref = "itextg" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

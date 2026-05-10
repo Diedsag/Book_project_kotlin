@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
-import com.example.mainprojectkt.presentation.ui.screen.DocumentViewer
+import com.example.mainprojectkt.presentation.ui.screen.PdfChoiceScreen
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 @Composable
@@ -33,7 +33,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             })
         }
         composable("pdf") {
-            DocumentViewer(
+            PdfChoiceScreen(
                 viewModel::changeUri,
                 {navController.navigate("home")}
             )

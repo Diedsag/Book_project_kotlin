@@ -23,7 +23,7 @@ fun BAMainScreen(
             Text("Страница")
         }
         Button(onClick = toPdf) {
-            Text("PDF")
+            Text("Выбрать PDF")
         }
     }
 }

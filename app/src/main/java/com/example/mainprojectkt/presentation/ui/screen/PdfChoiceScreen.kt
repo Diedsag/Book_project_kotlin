@@ -1,6 +1,7 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,7 @@ import androidx.compose.ui.Alignment
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun DocumentViewer(
+fun PdfChoiceScreen(
     change: (Uri) -> Unit,
     onBack: () -> Unit
 ) {
@@ -42,6 +43,7 @@ fun DocumentViewer(
         }
         Text("Selected: $documentUri")
         Button({change(documentUri!!)
+            Log.d("TAG", documentUri.toString())
             onBack()
         }) {
             Text("Save")
