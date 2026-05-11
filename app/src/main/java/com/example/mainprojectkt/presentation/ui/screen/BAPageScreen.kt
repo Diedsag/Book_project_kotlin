@@ -1,5 +1,6 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.contextmenu.builder.item
 import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -30,22 +32,26 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.itextpdf.text.pdf.TextField
 
 @Composable
 fun BAPageScreen(
+    n_pages: Int,
     number: Int,
-    text: String,
-    onMove: (Int) -> Unit
+    page: PageWithStyles,
+    onMove: (Int) -> Unit,
+    onChangeStyle: (List<PageWithStyles>) -> Unit
 ){
+    Log.d("TAG", "!")
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.StartToEnd ) {
-                onMove(-1)
+                onMove(number - 1)
                 true
             } else {
                 if (dismissValue == SwipeToDismissBoxValue.EndToStart){
-                    onMove(1)
+                    onMove(number + 1)
                     true
                 }
                 else
@@ -54,7 +60,9 @@ fun BAPageScreen(
         }
     )
     val styleRanges by remember { mutableStateOf(mutableListOf<StyleRange>()) }
-    var value by remember {mutableStateOf(TextFieldValue(text))}
+    val sliderPosition by remember { mutableStateOf(number.toFloat()) }
+    var value by remember {mutableStateOf(TextFieldValue(page.text))}
+    changeValue(value, page.styles.toMutableList(), null)
 
     val textStyle = TextStyle(
         fontSize = 16.sp,
@@ -66,8 +74,10 @@ fun BAPageScreen(
         dismissState,
         {}
     ) {
+        Column() {
             Box {
-                Text(value.annotatedString,
+                Text(
+                    value.annotatedString,
                     style = textStyle.copy(color = Color.Transparent),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -78,23 +88,29 @@ fun BAPageScreen(
                     onValueChange = { value = it },
                     textStyle = textStyle,
                     readOnly = true,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth().appendTextContextMenuComponents {
-                        separator()
-                        item(key = "Blue", label = "Синий") {
-                            value = changeValue(value, styleRanges, Color.Blue)
-                            close()
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth()
+                        .appendTextContextMenuComponents {
+                            separator()
+                            item(key = "Blue", label = "Синий") {
+                                value = changeValue(value, styleRanges, Color.Blue)
+                                close()
+                            }
+                            separator()
+                            item(key = "Yellow", label = "Желтый") {
+                                value = changeValue(value, styleRanges, Color.Yellow)
+                                close()
+                            }
                         }
-                        separator()
-                        item(key = "Yellow", label = "Желтый") {
-                            value = changeValue(value, styleRanges, Color.Yellow)
-                            close()
-                        }
-                    }
                 )
             }
-            Text(number.toString())
+            Slider(
+                value = sliderPosition,
+                onValueChange = { onMove(it.toInt()) },
+                valueRange = 1f..n_pages.toFloat() - 1,
+                steps = 3
+            )
         }
-
+    }
 }
 
 data class StyleRange(
@@ -102,18 +118,20 @@ data class StyleRange(
     val spanStyle: SpanStyle,
     val link: String?
 )
-fun changeValue(value: TextFieldValue, styleRanges: MutableList<StyleRange>, color: Color) : TextFieldValue{
-    val newStyleRange = StyleRange(
-        TextRange(
-            value.selection.start,
-            value.selection.end),
-        SpanStyle(background = color),
-        null
-    )
-    if (styleRanges.contains(newStyleRange))
-        styleRanges.remove(newStyleRange)
-    else
-        styleRanges.add(newStyleRange)
+fun changeValue(value: TextFieldValue, styleRanges: MutableList<StyleRange>, color: Color?) : TextFieldValue{
+    color?.let{
+        val newStyleRange = StyleRange(
+            TextRange(
+                value.selection.start,
+                value.selection.end),
+            SpanStyle(background = it),
+            null
+        )
+        if (styleRanges.contains(newStyleRange))
+            styleRanges.remove(newStyleRange)
+        else
+            styleRanges.add(newStyleRange)
+    }
     val new_string = buildAnnotatedString {
         append(value.text)
         styleRanges.forEach { styleRange ->

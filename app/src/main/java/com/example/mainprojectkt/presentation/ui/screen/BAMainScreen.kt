@@ -1,5 +1,6 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -19,7 +20,8 @@ fun BAMainScreen(
     Column() {
         Text("Hello friend")
         TextField(number, { number = it })
-        Button(onClick = { onClick(number.toInt()) }) {
+        Button(onClick = { Log.d("TAG", "try")
+            onClick(number.toInt()) }) {
             Text("Страница")
         }
         Button(onClick = toPdf) {

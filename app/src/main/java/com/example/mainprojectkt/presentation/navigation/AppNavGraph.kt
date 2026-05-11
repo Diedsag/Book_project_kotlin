@@ -12,10 +12,12 @@ import androidx.navigation.navArgument
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.PdfChoiceScreen
+import com.example.mainprojectkt.presentation.ui.screen.StyleRange
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 @Composable
 fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
+    val pagesState by viewModel.todosState.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
@@ -28,9 +30,14 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             arguments = listOf(navArgument("number") {type = NavType.IntType})
             ) {backStackEntry ->
             val number = backStackEntry.arguments?.getInt("number") ?: return@composable
-            val text = viewModel.getText(number)
-            BAPageScreen(number, text, {back -> navController.navigate("page/${number+back}")
-            })
+            val page = pagesState[number]
+            BAPageScreen(
+                pagesState.size,
+                number,
+                page,
+                {num -> navController.navigate("page/${num}")},
+                viewModel::changePages
+            )
         }
         composable("pdf") {
             PdfChoiceScreen(

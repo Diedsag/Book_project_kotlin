@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.repository.BARepository
+import com.example.mainprojectkt.domain.usecase.GetPagesUseCase
 import com.example.mainprojectkt.domain.usecase.GetTextUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.MainProjectKtTheme
@@ -33,11 +34,11 @@ class MainActivity : ComponentActivity() {
         val repository = BARepositoryImpl(
             BADataSource(this)
         )
-        val getTextUseCase = GetTextUseCase(repository)
+        val getPagesUseCase = GetPagesUseCase(repository)
 
         val viewModel = BAViewModel(
             applicationContext,
-            getTextUseCase
+            getPagesUseCase
         )
         setContent {
             navController = rememberNavController()
