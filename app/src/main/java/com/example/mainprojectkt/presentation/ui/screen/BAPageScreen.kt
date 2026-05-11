@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.contextmenu.builder.item
 import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -74,8 +75,17 @@ fun BAPageScreen(
         dismissState,
         {}
     ) {
-        Column() {
-            Box {
+        Scaffold(
+            bottomBar = {
+                Slider(
+                    value = sliderPosition,
+                    onValueChange = { onMove(it.toInt()) },
+                    valueRange = 1f..n_pages.toFloat() - 1,
+                    steps = 3
+                )
+            }
+        ) {paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
                 Text(
                     value.annotatedString,
                     style = textStyle.copy(color = Color.Transparent),
@@ -103,12 +113,7 @@ fun BAPageScreen(
                         }
                 )
             }
-            Slider(
-                value = sliderPosition,
-                onValueChange = { onMove(it.toInt()) },
-                valueRange = 1f..n_pages.toFloat() - 1,
-                steps = 3
-            )
+
         }
     }
 }
