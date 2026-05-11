@@ -2,6 +2,7 @@ package com.example.mainprojectkt.presentation.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +21,7 @@ class BAViewModel (
 ) : ViewModel(
 ) {
     var documentUri = mutableStateOf<Uri?>(null)
-    var todosState: MutableStateFlow<List<PageWithStyles>> = MutableStateFlow(listOf<PageWithStyles>())
+    var pagesState: MutableStateFlow<List<PageWithStyles>> = MutableStateFlow(listOf<PageWithStyles>())
     fun changeUri(newUri: Uri){
         documentUri.value = newUri
         getPages()
@@ -29,12 +30,17 @@ class BAViewModel (
         documentUri.value?.let{
             viewModelScope.launch {
                 getPagesUseCase(it).collect { element->
-                    todosState.value += element
+                    pagesState.value += element
                 }
             }
         }
     }
-    fun changePages(new_pages: List<PageWithStyles>){
-        todosState.value = new_pages
+    fun changePages(new_page: PageWithStyles){
+        pagesState.value = pagesState.value.toMutableList().apply {
+            set(new_page.number - 1, new_page)
+        }
+        pagesState.value.forEach { it ->
+            Log.d("TAG", it.styles.size.toString())
+        }
     }
 }

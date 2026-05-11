@@ -83,7 +83,7 @@ class BADataSource(val context: Context) {
         for (i in 1..pdfReader.numberOfPages)
             emit(
                 PageWithStyles(
-                    PdfTextExtractor.getTextFromPage(pdfReader, i), listOf()
+                    i, PdfTextExtractor.getTextFromPage(pdfReader, i), listOf()
                 )
             )
     }.flowOn(Dispatchers.IO)

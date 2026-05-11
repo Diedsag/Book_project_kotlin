@@ -17,7 +17,7 @@ import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 @Composable
 fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
-    val pagesState by viewModel.todosState.collectAsStateWithLifecycle()
+    val pagesState by viewModel.pagesState.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
@@ -33,7 +33,6 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             val page = pagesState[number]
             BAPageScreen(
                 pagesState.size,
-                number,
                 page,
                 {num -> navController.navigate("page/${num}")},
                 viewModel::changePages

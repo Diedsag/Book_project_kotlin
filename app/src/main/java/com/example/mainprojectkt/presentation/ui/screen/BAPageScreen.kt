@@ -39,20 +39,18 @@ import com.itextpdf.text.pdf.TextField
 @Composable
 fun BAPageScreen(
     n_pages: Int,
-    number: Int,
     page: PageWithStyles,
     onMove: (Int) -> Unit,
-    onChangeStyle: (List<PageWithStyles>) -> Unit
+    onChangeStyle: (PageWithStyles) -> Unit
 ){
-    Log.d("TAG", "!")
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.StartToEnd ) {
-                onMove(number - 1)
+            if (dismissValue == SwipeToDismissBoxValue.StartToEnd){
+                onMove(page.number - 2)
                 true
             } else {
                 if (dismissValue == SwipeToDismissBoxValue.EndToStart){
-                    onMove(number + 1)
+                    onMove(page.number)
                     true
                 }
                 else
@@ -60,10 +58,10 @@ fun BAPageScreen(
             }
         }
     )
-    val styleRanges by remember { mutableStateOf(mutableListOf<StyleRange>()) }
-    val sliderPosition by remember { mutableStateOf(number.toFloat()) }
+    val styleRanges by remember { mutableStateOf(page.styles.toMutableList()) }
+    val sliderPosition by remember { mutableStateOf(page.number.toFloat()) }
     var value by remember {mutableStateOf(TextFieldValue(page.text))}
-    changeValue(value, page.styles.toMutableList(), null)
+    value = changeValue(value, page.styles.toMutableList(), null)
 
     val textStyle = TextStyle(
         fontSize = 16.sp,
@@ -103,11 +101,13 @@ fun BAPageScreen(
                             separator()
                             item(key = "Blue", label = "Синий") {
                                 value = changeValue(value, styleRanges, Color.Blue)
+                                onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
                                 close()
                             }
                             separator()
                             item(key = "Yellow", label = "Желтый") {
                                 value = changeValue(value, styleRanges, Color.Yellow)
+                                onChangeStyle(PageWithStyles(page.number,value.text, styleRanges))
                                 close()
                             }
                         }
