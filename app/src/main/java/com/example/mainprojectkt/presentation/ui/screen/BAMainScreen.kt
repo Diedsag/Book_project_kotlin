@@ -18,7 +18,6 @@ fun BAMainScreen(
 ){
     var number by remember { mutableStateOf("") }
     Column() {
-        Text("Hello friend")
         TextField(number, { number = it })
         Button(onClick = { Log.d("TAG", "try")
             onClick(number.toInt()) }) {

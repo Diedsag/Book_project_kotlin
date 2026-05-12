@@ -35,7 +35,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 pagesState.size,
                 page,
                 {num -> navController.navigate("page/${num}")},
-                viewModel::changePages
+                viewModel::changePages,
+                {navController.navigate("home")}
             )
         }
         composable("pdf") {

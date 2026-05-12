@@ -19,7 +19,6 @@ import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.repository.BARepository
 import com.example.mainprojectkt.domain.usecase.GetPagesUseCase
-import com.example.mainprojectkt.domain.usecase.GetTextUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.MainProjectKtTheme
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel

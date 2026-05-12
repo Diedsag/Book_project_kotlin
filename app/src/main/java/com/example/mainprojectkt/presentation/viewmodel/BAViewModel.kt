@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.usecase.GetPagesUseCase
-import com.example.mainprojectkt.domain.usecase.GetTextUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -38,9 +37,6 @@ class BAViewModel (
     fun changePages(new_page: PageWithStyles){
         pagesState.value = pagesState.value.toMutableList().apply {
             set(new_page.number - 1, new_page)
-        }
-        pagesState.value.forEach { it ->
-            Log.d("TAG", it.styles.size.toString())
         }
     }
 }

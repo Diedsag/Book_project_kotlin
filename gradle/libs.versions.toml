@@ -11,9 +11,11 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 composeBom = "2024.09.00"
 lifecycleViewmodelCompose = "2.10.0"
+materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.8"
 
 [libraries]
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7Core" }
