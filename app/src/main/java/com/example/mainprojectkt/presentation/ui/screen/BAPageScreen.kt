@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.PageWithStyles
+import com.example.mainprojectkt.domain.model.StyleRange
 import com.itextpdf.text.pdf.TextField
 
 @Composable
@@ -152,11 +153,6 @@ fun BAPageScreen(
     }
 }
 
-data class StyleRange(
-    val textRange: TextRange,
-    val spanStyle: SpanStyle,
-    val link: String?
-)
 fun changeValue(value: TextFieldValue, styleRanges: MutableList<StyleRange>, color: Color?) : TextFieldValue{
     color?.let{
         val newStyleRange = StyleRange(

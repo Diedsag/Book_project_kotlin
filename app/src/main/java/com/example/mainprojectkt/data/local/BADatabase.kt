@@ -1,0 +1,28 @@
+package com.example.mainprojectkt.data.local
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.mainprojectkt.data.local.dao.BookDao
+import com.example.mainprojectkt.data.local.dao.PageDao
+import com.example.mainprojectkt.data.local.dao.StyleDao
+import com.example.mainprojectkt.data.local.entity.BookEntity
+import com.example.mainprojectkt.data.local.entity.PageEntity
+import com.example.mainprojectkt.data.local.entity.StyleEntity
+
+@Database(entities = [BookEntity::class, PageEntity::class, StyleEntity::class], version = 3, exportSchema = true)
+abstract class BADatabase: RoomDatabase() {
+    abstract fun bookDao(): BookDao
+    abstract fun pageDao(): PageDao
+    abstract fun styleDao(): StyleDao
+
+    companion object{
+        @Volatile private var instance: BADatabase? = null
+
+        fun getDatabase(context: Context): BADatabase = instance ?: synchronized(this){
+            Room.databaseBuilder(context, BADatabase::class.java, "main_database")
+                .build().also { instance = it }
+        }
+    }
+}

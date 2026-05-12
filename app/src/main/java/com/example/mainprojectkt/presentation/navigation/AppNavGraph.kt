@@ -15,7 +15,6 @@ import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
-import com.example.mainprojectkt.presentation.ui.screen.StyleRange
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 @Composable

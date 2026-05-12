@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.mainprojectkt.data.local.BADataSource
+import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.repository.BARepository
 import com.example.mainprojectkt.domain.usecase.GetBookUseCase
@@ -32,7 +33,8 @@ class MainActivity : ComponentActivity() {
 
         var navController: NavHostController
         val repository = BARepositoryImpl(
-            BADataSource(this)
+            BADataSource(this),
+            BADatabase.getDatabase(this)
         )
         val getBookUseCase = GetBookUseCase(repository)
 
