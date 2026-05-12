@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.contextmenu.builder.item
 import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
@@ -113,7 +116,7 @@ fun BAPageScreen(
                 }
             }
         ) {paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
+            Box(modifier = Modifier.wrapContentSize().padding(paddingValues).verticalScroll(rememberScrollState())) {
                 Text(
                     value.annotatedString,
                     style = textStyle.copy(color = Color.Transparent),
@@ -126,7 +129,8 @@ fun BAPageScreen(
                     onValueChange = { value = it },
                     textStyle = textStyle,
                     readOnly = true,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth()
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        .fillMaxWidth()
                         .appendTextContextMenuComponents {
                             separator()
                             item(key = "Blue", label = "Синий") {
