@@ -9,18 +9,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
-import com.example.mainprojectkt.domain.usecase.GetPagesUseCase
+import com.example.mainprojectkt.domain.usecase.GetBookUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class BAViewModel (
     val context: Context,
-    val getPagesUseCase: GetPagesUseCase
+    val getBookUseCase: GetBookUseCase,
 ) : ViewModel(
 ) {
     var documentUri = mutableStateOf<Uri?>(null)
     var pagesState: MutableStateFlow<List<PageWithStyles>> = MutableStateFlow(listOf<PageWithStyles>())
+    var bookState: MutableStateFlow<Book> = MutableStateFlow(Book("", listOf(), 1))
+    val hasBook = MutableStateFlow(false)
     fun changeUri(newUri: Uri){
         documentUri.value = newUri
         getPages()
@@ -28,15 +31,35 @@ class BAViewModel (
     fun getPages(){
         documentUri.value?.let{
             viewModelScope.launch {
-                getPagesUseCase(it).collect { element->
-                    pagesState.value += element
-                }
+                getBookUseCase(it).collect {
+                    bookState.value = it }
+                pagesState.value = bookState.value.pages
+                hasBook.value = true
             }
         }
     }
-    fun changePages(new_page: PageWithStyles){
-        pagesState.value = pagesState.value.toMutableList().apply {
-            set(new_page.number - 1, new_page)
-        }
+//    fun getBook(){
+//        documentUri.value?.let{
+//            viewModelScope.launch {
+//                getBookUseCase(it).collect { element->
+//                    bookState.value.pages += element
+//                }
+//                getting = true
+//            }
+//        }
+//    }
+    fun changeBook(newPage: PageWithStyles){
+        bookState.value = Book(
+            bookState.value.name,
+            bookState.value.pages.toMutableList().apply {
+                set(newPage.number - 1, newPage)
+            },
+            bookState.value.lastPage)
+    }
+    fun changeLastNum(newLastNum: Int){
+        bookState.value = Book(
+            bookState.value.name,
+            bookState.value.pages,
+            newLastNum)
     }
 }

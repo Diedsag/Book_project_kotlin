@@ -1,8 +1,10 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
@@ -25,6 +27,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -52,11 +55,11 @@ fun BAPageScreen(
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.StartToEnd){
-                onMove(page.number - 2)
+                onMove(page.number - 1)
                 true
             } else {
                 if (dismissValue == SwipeToDismissBoxValue.EndToStart){
-                    onMove(page.number)
+                    onMove(page.number + 1)
                     true
                 }
                 else
@@ -88,11 +91,24 @@ fun BAPageScreen(
                         valueRange = 1f..n_pages.toFloat(),
                         steps = n_pages - 2
                     )
-                    Button({onBack()}) {
-                        Icon(
-                            Icons.Default.Home,
-                            "На главную"
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        Arrangement.Start,
+                        Alignment.CenterVertically
+                    ) {
+                        Button({ onBack() }) {
+                            Icon(
+                                Icons.Default.Home,
+                                "На главную"
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            Arrangement.Center,
+                            Alignment.CenterVertically
+                        ){
+                            Text(page.number.toString())
+                        }
                     }
                 }
             }
