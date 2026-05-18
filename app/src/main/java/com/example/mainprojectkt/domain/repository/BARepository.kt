@@ -6,5 +6,5 @@ import com.example.mainprojectkt.domain.model.PageWithStyles
 import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
-    fun getBook(uri: Uri): Flow<Book>
+    fun scanBook(uri: Uri): Flow<Book>
 }

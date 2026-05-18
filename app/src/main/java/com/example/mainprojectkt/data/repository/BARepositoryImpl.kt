@@ -13,7 +13,7 @@ class BARepositoryImpl(
     val dataSource: BADataSource,
     val database: BADatabase
 ): BARepository{
-    override fun getBook(uri: Uri): Flow<Book> {
-        return dataSource.getBook(uri)
+    override fun scanBook(uri: Uri): Flow<Book> {
+        return dataSource.scanBook(uri)
     }
 }

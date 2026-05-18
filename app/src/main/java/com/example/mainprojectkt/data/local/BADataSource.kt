@@ -17,7 +17,7 @@ import java.io.File
 import java.net.URI
 
 class BADataSource(val context: Context) {
-    fun getBook(uri: Uri): Flow<Book> = flow{
+    fun scanBook(uri: Uri): Flow<Book> = flow{
         val pdfReader = PdfReader(context.contentResolver.openInputStream(uri))
         val pages = mutableListOf<PageWithStyles>()
         for (i in 1..pdfReader.numberOfPages)
@@ -26,6 +26,6 @@ class BADataSource(val context: Context) {
                     i, PdfTextExtractor.getTextFromPage(pdfReader, i), listOf()
                     )
                 )
-        emit(Book(pdfReader.info.get("Title"), pages.toList(), 1))
+        emit(Book(-1,pdfReader.info.get("Title"), pages.toList(), 1))
     }.flowOn(Dispatchers.IO)
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 fun BAMainScreen(
     onClick: (Int) -> Unit,
     toPdf: () -> Unit,
+    toBooks: () -> Unit,
     hasBook: Boolean
 ){
     var number by remember { mutableStateOf("") }
@@ -32,7 +33,10 @@ fun BAMainScreen(
             Text(if (hasBook) "" else "Дождитесь загрузки книги")
         }
         Button(onClick = toPdf) {
-            Text("Выбрать PDF")
+            Text("Загрузить PDF")
+        }
+        Button(onClick = toBooks) {
+            Text("Выбрать книги")
         }
     }
 }

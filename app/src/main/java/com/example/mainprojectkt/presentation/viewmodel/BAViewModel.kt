@@ -11,55 +11,53 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
-import com.example.mainprojectkt.domain.usecase.GetBookUseCase
+import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class BAViewModel (
     val context: Context,
-    val getBookUseCase: GetBookUseCase,
+    val scanBookUseCase: ScanBookUseCase,
 ) : ViewModel(
 ) {
     var documentUri = mutableStateOf<Uri?>(null)
     var pagesState: MutableStateFlow<List<PageWithStyles>> = MutableStateFlow(listOf<PageWithStyles>())
-    var bookState: MutableStateFlow<Book> = MutableStateFlow(Book("", listOf(), 1))
+    var booksState: MutableStateFlow<List<Book>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
+    var curBook = MutableStateFlow(0)
     fun changeUri(newUri: Uri){
         documentUri.value = newUri
-        getPages()
+        scanBook()
     }
-    fun getPages(){
+    fun scanBook(){
         documentUri.value?.let{
             viewModelScope.launch {
-                getBookUseCase(it).collect {
-                    bookState.value = it }
-                pagesState.value = bookState.value.pages
+                scanBookUseCase(it).collect {element ->
+                    booksState.value += element.copy(id = booksState.value.size)
+                    curBook.value = booksState.value.size - 1
+                }
                 hasBook.value = true
             }
         }
     }
-//    fun getBook(){
-//        documentUri.value?.let{
-//            viewModelScope.launch {
-//                getBookUseCase(it).collect { element->
-//                    bookState.value.pages += element
-//                }
-//                getting = true
-//            }
-//        }
-//    }
-    fun changeBook(newPage: PageWithStyles){
-        bookState.value = Book(
-            bookState.value.name,
-            bookState.value.pages.toMutableList().apply {
-                set(newPage.number - 1, newPage)
-            },
-            bookState.value.lastPage)
+    fun changePage(newPage: PageWithStyles){
+        booksState.value = booksState.value.map {element ->
+            if (element.id == curBook.value) {
+                element.copy(pages =
+                    element.pages.toMutableList().apply {
+                        set(newPage.number - 1, newPage)
+                    }
+                )
+            }
+            else element
+        }
     }
     fun changeLastNum(newLastNum: Int){
-        bookState.value = Book(
-            bookState.value.name,
-            bookState.value.pages,
-            newLastNum)
+        booksState.value = booksState.value.map {element ->
+            if (element.id == curBook.value) {
+                element.copy(lastPage = newLastNum)
+            }
+            else element
+        }
     }
 }
