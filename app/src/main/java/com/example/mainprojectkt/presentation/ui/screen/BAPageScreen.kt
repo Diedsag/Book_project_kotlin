@@ -58,11 +58,11 @@ fun BAPageScreen(
 ){
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.StartToEnd){
+            if (dismissValue == SwipeToDismissBoxValue.StartToEnd && page.number > 1){
                 onMove(page.number - 1)
                 true
             } else {
-                if (dismissValue == SwipeToDismissBoxValue.EndToStart){
+                if (dismissValue == SwipeToDismissBoxValue.EndToStart && page.number + 1 < n_pages){
                     onMove(page.number + 1)
                     true
                 }
