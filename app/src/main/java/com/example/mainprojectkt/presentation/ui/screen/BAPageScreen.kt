@@ -62,7 +62,7 @@ fun BAPageScreen(
                 onMove(page.number - 1)
                 true
             } else {
-                if (dismissValue == SwipeToDismissBoxValue.EndToStart && page.number + 1 < n_pages){
+                if (dismissValue == SwipeToDismissBoxValue.EndToStart && page.number < n_pages){
                     onMove(page.number + 1)
                     true
                 }
@@ -93,7 +93,7 @@ fun BAPageScreen(
                         value = sliderPosition,
                         onValueChange = { onMove(it.toInt()) },
                         valueRange = 1f..n_pages.toFloat(),
-                        steps = n_pages - 2
+                        steps = n_pages - 1
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),

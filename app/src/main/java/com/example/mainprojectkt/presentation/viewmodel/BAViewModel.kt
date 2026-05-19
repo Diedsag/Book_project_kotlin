@@ -23,9 +23,23 @@ class BAViewModel (
 ) : ViewModel(
 ) {
     var documentUri = mutableStateOf<Uri?>(null)
-   var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
+    var last_id = 0
+    var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
     var curBookId = MutableStateFlow<Int?>(null)
+    init{
+        viewModelScope.launch {
+            downloadBooksUseCase().collect {elements ->
+                booksUiState.value += elements.map {
+                    element ->
+                    last_id = element.id
+                    BookUiState.Success(element)
+                }
+
+            }
+            hasBook.value = true
+        }
+    }
     fun changeUri(newUri: Uri){
         documentUri.value = newUri
         scanBook()
@@ -33,7 +47,7 @@ class BAViewModel (
     fun scanBook(){
         documentUri.value?.let{
             viewModelScope.launch {
-                val new_id = booksUiState.value.size - 1 //Change for case of different users
+                val new_id = ++last_id //Change for case of different users
                 booksUiState.value += BookUiState.Loading(new_id)
                 scanBookUseCase(it).collect {element ->
                     booksUiState.value = booksUiState.value.toMutableList().apply{
@@ -70,14 +84,21 @@ class BAViewModel (
         }
     }
     fun uploadBook(book: BookUiState?){
-        book.let { it ->
-            uploadBookUseCase((it as BookUiState.Success).book).launchIn(viewModelScope)
-        }
+        if (book != null)
+            uploadBookUseCase((book as BookUiState.Success).book).launchIn(viewModelScope)
     }
     fun getCount(){
         viewModelScope.launch {
             downloadBooksUseCase().collect { data ->
                 Log.d("TAG", data.size.toString())
+            }
+        }
+    }
+    fun checkRelation(id: Int){
+        viewModelScope.launch {
+            downloadBooksUseCase(id.toLong()).collect {x ->
+                Log.d("TAG", "bm: " + x!!.book.name)
+                Log.d("TAG", "ps: " + x.pages.size.toString())
             }
         }
     }

@@ -6,19 +6,19 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "Styles",
-    indices = [Index(value = ["page_id", "id"], unique = false)],
+    indices = [Index(value = ["pageId", "id"], unique = false)],
     foreignKeys = [
         ForeignKey(
             entity = PageEntity::class,
             parentColumns = ["id"],
-            childColumns = ["page_id"],
+            childColumns = ["pageId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class StyleEntity (
     @PrimaryKey(autoGenerate = true) val id: Int,
-    val page_id: Int,
+    val pageId: Long,
     val start: Int,
     val end: Int,
     val style: String //TODO

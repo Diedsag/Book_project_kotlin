@@ -20,6 +20,7 @@ fun BAMainScreen(
     toBooks: () -> Unit,
     count: () -> Unit,
     upload: () -> Unit,
+    check: () -> Unit,
     hasBook: Boolean
 ){
     var number by remember { mutableStateOf("") }
@@ -45,6 +46,9 @@ fun BAMainScreen(
         }
         Button(onClick = count) {
             Text("Подсчитать")
+        }
+        Button(onClick = check) {
+            Text("Проверить")
         }
     }
 }

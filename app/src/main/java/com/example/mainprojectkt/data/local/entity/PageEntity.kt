@@ -6,19 +6,19 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "Pages",
-    indices = [Index(value = ["book_id", "id"], unique = false)],
+    indices = [Index(value = ["bookId", "id"], unique = false)],
     foreignKeys = [
         ForeignKey(
             entity = BookEntity::class,
             parentColumns = ["id"],
-            childColumns = ["book_id"],
+            childColumns = ["bookId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class PageEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
-    val book_id: Int,
+    val bookId: Int,
     val number: Int,
     val text: String
 )

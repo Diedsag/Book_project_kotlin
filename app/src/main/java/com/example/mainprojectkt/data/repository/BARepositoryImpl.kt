@@ -2,12 +2,12 @@ package com.example.mainprojectkt.data.repository
 
 import android.net.Uri
 import android.util.Log
-import androidx.room.Database
 import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.local.entity.BookEntity
 import com.example.mainprojectkt.data.local.entity.PageEntity
 import com.example.mainprojectkt.data.local.entity.StyleEntity
+import com.example.mainprojectkt.data.model.BookWithPages
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
@@ -19,31 +19,36 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 fun Book.toEntity() = BookEntity(
-    id = id,
+    id = 0,
     name = name.toString(),
     lastPage = lastPage
 )
 
-fun PageWithStyles.toEntity() = PageEntity(
-    id = 1,
-    book_id = 3,
+fun PageWithStyles.toEntity(bookId: Int) = PageEntity(
+    id = 0,
+    bookId = bookId,
     number = number,
     text = text
 )
 
-fun StyleRange.toEntity() = StyleEntity(
-    id = 1,
+fun StyleRange.toEntity(pageId: Long) = StyleEntity(
+    id = 0,
     end = textRange.end,
     start = textRange.start,
-    page_id = 1,
+    pageId = pageId,
     style = "test"
 )
 
-fun BookEntity.toDomain() = Book(
-    id = id,
+fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
+    id = id.toInt(),
     name = name,
-    pages = listOf(),
+    pages = pages,
     lastPage = lastPage
+)
+fun PageEntity.toDomain() = PageWithStyles(
+    number = number,
+    text = text,
+    styles = listOf()
 )
 class BARepositoryImpl(
     val dataSource: BADataSource,
@@ -56,15 +61,25 @@ class BARepositoryImpl(
     override fun uploadBook(book: Book): Flow<Unit> {
         return flow{
             database.bookDao().addBook(book.toEntity())
-            book.pages.forEach{it ->
-                database.pageDao().addPage(it.toEntity())
-                it.styles.forEach { database.styleDao().addStyle(it.toEntity()) }
+            book.pages.forEach{ page ->
+                val pageId = database.pageDao().addPage(page.toEntity(book.id))
+                page.styles.forEach { style ->
+                    database.styleDao().addStyle(style.toEntity(pageId))
+                }
             }
             emit(Unit)
         }.flowOn(Dispatchers.IO)
     }
 
     override fun downloadBooks(): Flow<List<Book>> {
-        return database.bookDao().getBooks().map { list -> list.map { it.toDomain() } }
+        return database.bookDao().getBooks().map { list -> list.map {element ->
+            val pages = database.pageDao().getPagesByBook(element.id)
+            element.toDomain(pages.map { it.toDomain() })
+             }
+        }
+    }
+
+    override suspend fun getBookWithPages(bookId: Long): BookWithPages? {
+        return database.bookDao().getBookWithPages(bookId)
     }
 }

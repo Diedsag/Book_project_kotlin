@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mainprojectkt.domain.model.Book
-import com.example.mainprojectkt.presentation.ui.screen.BABookChoiceScreen
+import com.example.mainprojectkt.presentation.ui.screen.BABookListScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
@@ -32,6 +32,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 {navController.navigate("books")},
                 viewModel::getCount,
                 {viewModel.uploadBook(curBook)},
+                {viewModel.checkRelation(1)},
                 viewModel.hasBook.collectAsStateWithLifecycle().value,
             )
         }
@@ -40,17 +41,20 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             arguments = listOf(navArgument("number") {type = NavType.IntType})
             ) {backStackEntry ->
             val number = backStackEntry.arguments?.getInt("number") ?: return@composable
-            val curBook = (booksState.find { it is BookUiState.Success && it.book.id == curBookId } as BookUiState.Success).book
-            val page = curBook.pages[number]
-            BAPageScreen(
-                curBook.pages.size,
-                page,
-                {num -> navController.navigate("page/${num}")
-                    viewModel.changeLastNum(num)
-                },
-                viewModel::changePage,
-                {navController.navigate("home")}
-            )
+            booksState.find { it is BookUiState.Success && it.book.id == curBookId }.let {
+                val curBook = (it as BookUiState.Success).book
+                val page = curBook.pages[number - 1]
+                BAPageScreen(
+                    curBook.pages.size,
+                    page,
+                    {num -> navController.navigate("page/${num}")
+                        viewModel.changeLastNum(num)
+                    },
+                    viewModel::changePage,
+                    {navController.navigate("home")}
+                )
+            }
+
         }
         composable("pdf") {
             BAPdfChoiceScreen(
@@ -59,9 +63,11 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             )
         }
         composable("books") {
-            BABookChoiceScreen(
+            BABookListScreen(
                 booksState,
-                {navController.navigate("home")}
+                {id ->
+                    viewModel.curBookId.value = id},
+                curBookId
             )
         }
     }
