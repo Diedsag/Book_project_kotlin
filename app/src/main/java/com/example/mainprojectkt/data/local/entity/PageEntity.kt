@@ -17,8 +17,8 @@ import androidx.room.PrimaryKey
     ]
 )
 data class PageEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val bookId: Int,
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val bookId: Long,
     val number: Int,
     val text: String
 )

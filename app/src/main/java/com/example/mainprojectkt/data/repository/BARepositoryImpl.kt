@@ -2,6 +2,9 @@ package com.example.mainprojectkt.data.repository
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.local.entity.BookEntity
@@ -24,7 +27,7 @@ fun Book.toEntity() = BookEntity(
     lastPage = lastPage
 )
 
-fun PageWithStyles.toEntity(bookId: Int) = PageEntity(
+fun PageWithStyles.toEntity(bookId: Long) = PageEntity(
     id = 0,
     bookId = bookId,
     number = number,
@@ -36,19 +39,24 @@ fun StyleRange.toEntity(pageId: Long) = StyleEntity(
     end = textRange.end,
     start = textRange.start,
     pageId = pageId,
-    style = "test"
+    style = if(spanStyle == SpanStyle(background = Color.Yellow)) "yellow" else "blue"
 )
 
 fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
-    id = id.toInt(),
+    id = id,
     name = name,
     pages = pages,
     lastPage = lastPage
 )
-fun PageEntity.toDomain() = PageWithStyles(
+fun PageEntity.toDomain(styles: List<StyleRange>) = PageWithStyles(
     number = number,
     text = text,
-    styles = listOf()
+    styles = styles
+)
+fun StyleEntity.toDomain() = StyleRange(
+    textRange = TextRange(start, end),
+    spanStyle = SpanStyle(background = if (style == "yellow") Color.Yellow else Color.Blue),
+    link = null
 )
 class BARepositoryImpl(
     val dataSource: BADataSource,
@@ -72,9 +80,11 @@ class BARepositoryImpl(
     }
 
     override fun downloadBooks(): Flow<List<Book>> {
-        return database.bookDao().getBooks().map { list -> list.map {element ->
-            val pages = database.pageDao().getPagesByBook(element.id)
-            element.toDomain(pages.map { it.toDomain() })
+        return database.bookDao().getBooks().map { list -> list.map {book ->
+            val pages = database.pageDao().getPagesByBook(book.id)
+            book.toDomain(pages.map { page ->
+                val styles = database.styleDao().getStylesByPage(page.id)
+                page.toDomain(styles.map{ it.toDomain()}) })
              }
         }
     }

@@ -23,10 +23,10 @@ class BAViewModel (
 ) : ViewModel(
 ) {
     var documentUri = mutableStateOf<Uri?>(null)
-    var last_id = 0
+    var last_id: Long = 0
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
-    var curBookId = MutableStateFlow<Int?>(null)
+    var curBookId = MutableStateFlow<Long?>(null)
     init{
         viewModelScope.launch {
             downloadBooksUseCase().collect {elements ->
@@ -35,9 +35,8 @@ class BAViewModel (
                     last_id = element.id
                     BookUiState.Success(element)
                 }
-
+                hasBook.value = true
             }
-            hasBook.value = true
         }
     }
     fun changeUri(newUri: Uri){
@@ -53,8 +52,8 @@ class BAViewModel (
                     booksUiState.value = booksUiState.value.toMutableList().apply{
                         set(booksUiState.value.size - 1, BookUiState.Success(element.copy(id = new_id)))
                     }
-                    curBookId.value = element.id
                 }
+                curBookId.value = new_id
                 hasBook.value = true
             }
         }

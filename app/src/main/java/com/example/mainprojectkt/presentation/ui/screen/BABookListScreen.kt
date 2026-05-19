@@ -23,8 +23,8 @@ import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 @Composable
 fun BABookListScreen(
     books: List<BookUiState>,
-    onItemClick: (Int) -> Unit,
-    curBookId: Int?
+    onItemClick: (Long) -> Unit,
+    curBookId: Long?
 ) {
     Scaffold(
     ) {padding ->

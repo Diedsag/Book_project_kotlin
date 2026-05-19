@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
     ]
 )
 data class StyleEntity (
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     val pageId: Long,
     val start: Int,
     val end: Int,
