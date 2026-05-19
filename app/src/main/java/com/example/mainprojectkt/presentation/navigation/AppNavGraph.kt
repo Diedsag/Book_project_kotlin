@@ -17,17 +17,21 @@ import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
+import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 
 @Composable
 fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
-    val booksState by viewModel.booksState.collectAsStateWithLifecycle()
-    val curBook by viewModel.curBook.collectAsStateWithLifecycle()
+    val booksState by viewModel.booksUiState.collectAsStateWithLifecycle()
+    val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
+            val curBook = booksState.find { it is BookUiState.Success && it.book.id == curBookId }
             BAMainScreen(
                 {number -> navController.navigate("page/${number}")},
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
+                viewModel::getCount,
+                {viewModel.uploadBook(curBook)},
                 viewModel.hasBook.collectAsStateWithLifecycle().value,
             )
         }
@@ -36,9 +40,10 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             arguments = listOf(navArgument("number") {type = NavType.IntType})
             ) {backStackEntry ->
             val number = backStackEntry.arguments?.getInt("number") ?: return@composable
-            val page = booksState[curBook].pages[number - 1]
+            val curBook = (booksState.find { it is BookUiState.Success && it.book.id == curBookId } as BookUiState.Success).book
+            val page = curBook.pages[number]
             BAPageScreen(
-                booksState[curBook].pages.size,
+                curBook.pages.size,
                 page,
                 {num -> navController.navigate("page/${num}")
                     viewModel.changeLastNum(num)

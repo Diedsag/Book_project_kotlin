@@ -14,7 +14,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
+import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
+import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.MainProjectKtTheme
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
@@ -30,11 +32,16 @@ class MainActivity : ComponentActivity() {
             BADataSource(this),
             BADatabase.getDatabase(this)
         )
+
         val scanBookUseCase = ScanBookUseCase(repository)
+        val uploadBookUseCase = UploadBookUseCase(repository)
+        val downloadBooksUseCase = DownloadBooksUseCase(repository)
 
         val viewModel = BAViewModel(
             applicationContext,
-            scanBookUseCase
+            scanBookUseCase,
+            uploadBookUseCase,
+            downloadBooksUseCase
         )
         setContent {
             navController = rememberNavController()

@@ -18,6 +18,8 @@ fun BAMainScreen(
     onClick: (Int) -> Unit,
     toPdf: () -> Unit,
     toBooks: () -> Unit,
+    count: () -> Unit,
+    upload: () -> Unit,
     hasBook: Boolean
 ){
     var number by remember { mutableStateOf("") }
@@ -37,6 +39,12 @@ fun BAMainScreen(
         }
         Button(onClick = toBooks) {
             Text("Выбрать книги")
+        }
+        Button(onClick = upload) {
+            Text("Загрузить")
+        }
+        Button(onClick = count) {
+            Text("Подсчитать")
         }
     }
 }

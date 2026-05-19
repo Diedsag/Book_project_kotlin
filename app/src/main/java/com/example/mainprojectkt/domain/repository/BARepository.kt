@@ -7,4 +7,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
     fun scanBook(uri: Uri): Flow<Book>
+    fun uploadBook(book: Book): Flow<Unit>
+    fun downloadBooks(): Flow<List<Book>>
 }

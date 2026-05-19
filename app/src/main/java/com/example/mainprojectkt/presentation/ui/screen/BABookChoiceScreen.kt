@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -34,11 +35,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.Book
+import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun BABookChoiceScreen(
-    books: List<Book>,
+    books: List<BookUiState>,
     onItemClick: (Int) -> Unit
 ) {
     Scaffold(
@@ -47,27 +49,51 @@ fun BABookChoiceScreen(
             Text(
                 "Список книг",
                 fontSize = 50.sp,
-                modifier = Modifier.padding(bottom = 30.dp).testTag("X")
+                modifier = Modifier.padding(bottom = 30.dp)
             )
-            LazyColumn {
-                items(
-                    books,
-                    key = {it.id}
+            if (books.isEmpty())
+                Text("У вас пока нет книг")
+            else{
+                LazyColumn {
+                    items(
+                        books,
+                        key = {it ->
+                            when(it){
+                                is BookUiState.Loading -> {
+                                    it.id
+                                }
+                                is BookUiState.Success -> {
+                                    it.book.id
+                                }
+                            }
+
+                        }
                     ) { item ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp, horizontal = 12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                                .clickable { onItemClick(item.id) }) {
-                            Text(
-                                item.name.toString(), fontSize = 30.sp
-                            )
-                            Text(
-                                "Страниц: " + item.pages.size.toString(), fontSize = 15.sp
-                            )
+                        when(item){
+                            is BookUiState.Loading -> {
+                                Box(modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                            is BookUiState.Success -> {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp, horizontal = 12.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth()
+                                            .clickable { onItemClick(item.book.id) }) {
+                                        Text(
+                                            item.book.name.toString(), fontSize = 30.sp
+                                        )
+                                        Text(
+                                            "Страниц: " + item.book.pages.size.toString(), fontSize = 15.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

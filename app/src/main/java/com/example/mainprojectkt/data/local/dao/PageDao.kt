@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PageDao {
-    @Insert (onConflict = OnConflictStrategy.IGNORE) suspend fun addBook(todo: PageEntity)
-    @Update suspend fun updatePage(todo: PageEntity)
-    @Delete suspend fun deletePage(todo: PageEntity)
+    @Insert (onConflict = OnConflictStrategy.IGNORE) suspend fun addPage(page: PageEntity)
+    @Update suspend fun updatePage(page: PageEntity)
+    @Delete suspend fun deletePage(page: PageEntity)
     @Query ("select * from Pages") fun getPages(): Flow<List<PageEntity>>
 }
