@@ -26,6 +26,6 @@ class BADataSource(val context: Context) {
                     i, PdfTextExtractor.getTextFromPage(pdfReader, i), listOf()
                     )
                 )
-        emit(Book(-1,pdfReader.info.get("Title"), pages.toList(), 1))
+        emit(Book(-1, pdfReader.info["Title"], pages.toList(), 1))
     }.flowOn(Dispatchers.IO)
 }

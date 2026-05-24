@@ -16,6 +16,7 @@ import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 import com.example.mainprojectkt.domain.repository.BARepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -62,15 +63,25 @@ class BARepositoryImpl(
     val dataSource: BADataSource,
     val database: BADatabase
 ): BARepository{
-    override fun scanBook(uri: Uri): Flow<Book> {
-        return dataSource.scanBook(uri)
+    override suspend fun scanBook(uri: Uri, id: Long): Result<Long> = runCatching{
+        dataSource.scanBook(uri).collect { book ->
+            val bookId = database.bookDao().addBook(book.toEntity())
+            book.pages.forEach{ page ->
+                val pageId = database.pageDao().addPage(page.toEntity(bookId))
+                page.styles.forEach { style ->
+                    database.styleDao().addStyle(style.toEntity(pageId))
+                }
+            }
+        }
+        id
     }
 
     override fun uploadBook(book: Book): Flow<Unit> {
         return flow{
-            database.bookDao().addBook(book.toEntity())
+            val bookId = database.bookDao().addBook(book.toEntity())
             book.pages.forEach{ page ->
-                val pageId = database.pageDao().addPage(page.toEntity(book.id))
+                Log.d("TAGG", bookId.toString())
+                val pageId = database.pageDao().addPage(page.toEntity(bookId))
                 page.styles.forEach { style ->
                     database.styleDao().addStyle(style.toEntity(pageId))
                 }
@@ -82,14 +93,25 @@ class BARepositoryImpl(
     override fun downloadBooks(): Flow<List<Book>> {
         return database.bookDao().getBooks().map { list -> list.map {book ->
             val pages = database.pageDao().getPagesByBook(book.id)
+            Log.d("TAG", "dB:" + pages.size.toString())
             book.toDomain(pages.map { page ->
                 val styles = database.styleDao().getStylesByPage(page.id)
                 page.toDomain(styles.map{ it.toDomain()}) })
-             }
+            }
         }
     }
 
     override suspend fun getBookWithPages(bookId: Long): BookWithPages? {
         return database.bookDao().getBookWithPages(bookId)
+    }
+
+    override fun updateBook(book: Book): Flow<Unit> = flow {
+        database.bookDao().updateBook(book.toEntity())
+    }
+    override fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit> = flow {
+        page.styles.forEach{style ->
+            database.styleDao().addStyle(style.toEntity(
+                database.pageDao().getPageByBookNum(bookId, page.number).id))
+        }
     }
 }

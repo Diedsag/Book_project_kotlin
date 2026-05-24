@@ -21,4 +21,8 @@ interface PageDao {
     @Transaction
     @Query("SELECT * FROM Pages WHERE bookId = :bookId")
     suspend fun getPagesByBook(bookId: Long): List<PageEntity>
+
+    @Transaction
+    @Query("SELECT * FROM Pages WHERE bookId = :bookId AND number = :num")
+    suspend fun getPageByBookNum(bookId: Long, num: Int): PageEntity
 }

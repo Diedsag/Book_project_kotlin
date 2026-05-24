@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.2"
+bcrypt = "0.10.2"
 itext7Core = "9.6.0"
 itextg = "5.5.10"
 kotlin = "2.0.21"
@@ -23,6 +24,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7Core" }
 itextg = { module = "com.itextpdf:itextg", version.ref = "itextg" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -16,6 +16,8 @@ import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
+import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
+import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
 import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.MainProjectKtTheme
@@ -36,12 +38,16 @@ class MainActivity : ComponentActivity() {
         val scanBookUseCase = ScanBookUseCase(repository)
         val uploadBookUseCase = UploadBookUseCase(repository)
         val downloadBooksUseCase = DownloadBooksUseCase(repository)
+        val updateBookUseCase = UpdateBookUseCase(repository)
+        val updatePageUseCase = UpdatePageUseCase(repository)
 
         val viewModel = BAViewModel(
             applicationContext,
             scanBookUseCase,
             uploadBookUseCase,
-            downloadBooksUseCase
+            downloadBooksUseCase,
+            updateBookUseCase,
+            updatePageUseCase
         )
         setContent {
             navController = rememberNavController()

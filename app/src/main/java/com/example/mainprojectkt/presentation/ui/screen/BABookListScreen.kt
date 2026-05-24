@@ -37,30 +37,14 @@ fun BABookListScreen(
             if (books.isEmpty())
                 Text("У вас пока нет книг")
             else{
-                books.forEach {
-                        it ->
-                    when(it){
-                        is BookUiState.Loading -> {
-                            Log.d("TAG", it.id.toString())
-                        }
-                        is BookUiState.Success -> {
-                            Log.d("TAG", it.book.id.toString())
-                        }
-                    }
+                books.forEach {Log.d("TAG1", books.indexOf(it).toString())
+
                 }
                 LazyColumn {
                     items(
                         books,
-                        key = {it ->
-                            when(it){
-                                is BookUiState.Loading -> {
-                                    "L" + it.id
-                                }
-                                is BookUiState.Success -> {
-                                    "S" + it.book.id
-                                }
-                            }
-
+                        key = {
+                            books.indexOf(it)
                         }
                     ) { item ->
                         when(item){

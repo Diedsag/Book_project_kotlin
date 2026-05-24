@@ -7,15 +7,21 @@ import androidx.room.RoomDatabase
 import com.example.mainprojectkt.data.local.dao.BookDao
 import com.example.mainprojectkt.data.local.dao.PageDao
 import com.example.mainprojectkt.data.local.dao.StyleDao
+import com.example.mainprojectkt.data.local.dao.UserDao
 import com.example.mainprojectkt.data.local.entity.BookEntity
 import com.example.mainprojectkt.data.local.entity.PageEntity
 import com.example.mainprojectkt.data.local.entity.StyleEntity
+import com.example.mainprojectkt.data.local.entity.UserBookEntity
+import com.example.mainprojectkt.data.local.entity.UserEntity
 
-@Database(entities = [BookEntity::class, PageEntity::class, StyleEntity::class], version = 3, exportSchema = true)
+@Database(entities = [BookEntity::class, PageEntity::class, StyleEntity::class, UserEntity::class, UserBookEntity::class]
+    , version = 3, exportSchema = true)
 abstract class BADatabase: RoomDatabase() {
     abstract fun bookDao(): BookDao
     abstract fun pageDao(): PageDao
     abstract fun styleDao(): StyleDao
+    abstract fun userDao(): UserDao
+    abstract fun userBookDao(): UserBookDao
 
     companion object{
         @Volatile private var instance: BADatabase? = null

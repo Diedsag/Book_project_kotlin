@@ -7,8 +7,10 @@ import com.example.mainprojectkt.domain.model.PageWithStyles
 import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
-    fun scanBook(uri: Uri): Flow<Book>
+    suspend fun scanBook(uri: Uri, id: Long): Result<Long>
     fun uploadBook(book: Book): Flow<Unit>
     fun downloadBooks(): Flow<List<Book>>
     suspend fun getBookWithPages(bookId: Long): BookWithPages?
+    fun updateBook(book: Book): Flow<Unit>
+    fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit>
 }

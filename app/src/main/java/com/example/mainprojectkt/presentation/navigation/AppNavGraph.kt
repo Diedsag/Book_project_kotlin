@@ -27,7 +27,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
         composable("home") {
             val curBook = booksState.find { it is BookUiState.Success && it.book.id == curBookId }
             BAMainScreen(
-                {number -> navController.navigate("page/${number}")},
+                {request -> if(request.toIntOrNull() != null) navController.navigate("page/${request.toInt()}")},
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
                 viewModel::getCount,
@@ -58,15 +58,15 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
         }
         composable("pdf") {
             BAPdfChoiceScreen(
-                viewModel::changeUri,
+                viewModel::scanBook,
                 {navController.navigate("home")}
             )
         }
         composable("books") {
             BABookListScreen(
                 booksState,
-                {id ->
-                    viewModel.curBookId.value = id},
+                {id -> viewModel.curBookId.value = id
+                    viewModel.hasBook.value = true},
                 curBookId
             )
         }

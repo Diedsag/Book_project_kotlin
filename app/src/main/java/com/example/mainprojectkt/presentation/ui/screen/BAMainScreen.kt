@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun BAMainScreen(
-    onClick: (Int) -> Unit,
+    onClick: (String) -> Unit,
     toPdf: () -> Unit,
     toBooks: () -> Unit,
     count: () -> Unit,
@@ -28,7 +28,7 @@ fun BAMainScreen(
         TextField(number, { number = it })
         Row() {
             Button(onClick = {
-                onClick(number.toInt()) },
+                onClick(number) },
                 enabled = hasBook
             ) {
                 Text("Страница")
