@@ -3,6 +3,7 @@ package com.example.mainprojectkt.data.local.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "UserBooks",
     foreignKeys = [
@@ -21,7 +22,7 @@ import androidx.room.Index
     ]
 )
 data class UserBookEntity (
-    val id: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     val userId: Long,
     val bookId: Long
 )

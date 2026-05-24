@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.mainprojectkt.data.local.dao.BookDao
 import com.example.mainprojectkt.data.local.dao.PageDao
 import com.example.mainprojectkt.data.local.dao.StyleDao
+import com.example.mainprojectkt.data.local.dao.UserBookDao
 import com.example.mainprojectkt.data.local.dao.UserDao
 import com.example.mainprojectkt.data.local.entity.BookEntity
 import com.example.mainprojectkt.data.local.entity.PageEntity
