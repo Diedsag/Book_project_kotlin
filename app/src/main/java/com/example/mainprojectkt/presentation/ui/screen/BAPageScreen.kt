@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -16,13 +18,16 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -44,6 +50,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 import com.itextpdf.text.pdf.TextField
@@ -71,10 +78,12 @@ fun BAPageScreen(
             }
         }
     )
+    var showNoteRedactor by remember { mutableStateOf(false) }
+    var noteText by remember { mutableStateOf("") }
     val styleRanges by remember { mutableStateOf(page.styles.toMutableList()) }
     val sliderPosition by remember { mutableFloatStateOf(page.number.toFloat()) }
     var value by remember {mutableStateOf(TextFieldValue(page.text))}
-    value = changeValue(value, page.styles.toMutableList(), null)
+    value = changeValue(value, page.styles.toMutableList(), null, null)
 
     val textStyle = TextStyle(
         fontSize = 16.sp,
@@ -118,34 +127,87 @@ fun BAPageScreen(
             }
         ) {paddingValues ->
             Box(modifier = Modifier.wrapContentSize().padding(paddingValues).verticalScroll(rememberScrollState())) {
-                Text(
-                    value.annotatedString,
-                    style = textStyle.copy(color = Color.Transparent),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                )
+                if (showNoteRedactor) {
+                    AlertDialog(
+                        onDismissRequest = { showNoteRedactor = false },
+                        title = { Text("Заметка") },
+                        text = {
+                            Column {
+                                Text("Пожалуйста, введите текст ниже:")
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = noteText,
+                                    onValueChange = { noteText = it },
+                                    label = { Text("Ваш ответ") },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    // Действие при подтверждении
+                                    Log.d("TAG", "Введённый текст: $noteText")
+                                    value = changeValue(value, styleRanges,
+                                        Color.Green, "myapp://note/3")
+                                    onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
+                                    showNoteRedactor = false
+                                }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    noteText = ""  // Очистить при отмене (опционально)
+                                    showNoteRedactor = false
+                                }
+                            ) {
+                                Text("Отмена")
+                            }
+                        },
+                        properties = DialogProperties(
+                            dismissOnBackPress = true,
+                            dismissOnClickOutside = true
+                        )
+                    )
+                }
+
                 BasicTextField(
                     value = value,
                     onValueChange = { value = it },
-                    textStyle = textStyle,
+                    textStyle = textStyle.copy(color = Color.Transparent),
                     readOnly = true,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
                         .appendTextContextMenuComponents {
                             separator()
                             item(key = "Blue", label = "Синий") {
-                                value = changeValue(value, styleRanges, Color.Blue)
+                                value = changeValue(value, styleRanges, Color.Blue, null)
                                 onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
                                 close()
                             }
                             separator()
                             item(key = "Yellow", label = "Желтый") {
-                                value = changeValue(value, styleRanges, Color.Yellow)
+                                value = changeValue(value, styleRanges, Color.Yellow, null)
                                 onChangeStyle(PageWithStyles(page.number,value.text, styleRanges))
                                 close()
                             }
+                            separator()
+                            item(key = "Note", label = "Добавить заметку") {
+                                showNoteRedactor = true
+                                close()
+                            }
                         }
+                )
+                Text(
+                    value.annotatedString,
+                    style = textStyle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 )
             }
 
@@ -153,21 +215,24 @@ fun BAPageScreen(
     }
 }
 
-fun changeValue(value: TextFieldValue, styleRanges: MutableList<StyleRange>, color: Color?) : TextFieldValue{
+fun changeValue(value: TextFieldValue,
+                styleRanges: MutableList<StyleRange>,
+                color: Color?,
+                link: String?) : TextFieldValue{
     color?.let{
         val newStyleRange = StyleRange(
             TextRange(
                 value.selection.start,
                 value.selection.end),
             SpanStyle(background = it),
-            null
+            link
         )
         if (styleRanges.contains(newStyleRange))
             styleRanges.remove(newStyleRange)
         else
             styleRanges.add(newStyleRange)
     }
-    val new_string = buildAnnotatedString {
+    val newString = buildAnnotatedString {
         append(value.text)
         styleRanges.forEach { styleRange ->
             addStyle(
@@ -177,13 +242,12 @@ fun changeValue(value: TextFieldValue, styleRanges: MutableList<StyleRange>, col
             )
             styleRange.link?.let{
                 addLink(
-                    LinkAnnotation.Url(
-                        it),
+                    LinkAnnotation.Url(styleRange.link),
                     styleRange.textRange.start,
                     styleRange.textRange.end
                 )
             }
         }
     }
-    return TextFieldValue(new_string, value.selection)
+    return TextFieldValue(newString, value.selection)
 }

@@ -21,5 +21,6 @@ data class StyleEntity (
     val pageId: Long,
     val start: Int,
     val end: Int,
-    val style: String //TODO
+    val style: String,
+    val link: String?
 )

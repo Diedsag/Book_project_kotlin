@@ -8,8 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +28,20 @@ import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 fun BABookListScreen(
     books: List<BookUiState>,
     onItemClick: (Long) -> Unit,
+    onBack: () -> Unit,
     curBookId: Long?
 ) {
     Scaffold(
+        bottomBar = {
+            Column() {
+                Button({onBack()}) {
+                    Icon(
+                        Icons.Default.Home,
+                        "На главную"
+                    )
+                }
+            }
+        }
     ) {padding ->
         Column(modifier = Modifier.padding(padding)) {
             Text(
@@ -37,9 +52,6 @@ fun BABookListScreen(
             if (books.isEmpty())
                 Text("У вас пока нет книг")
             else{
-                books.forEach {Log.d("TAG1", books.indexOf(it).toString())
-
-                }
                 LazyColumn {
                     items(
                         books,
@@ -64,7 +76,7 @@ fun BABookListScreen(
                                         modifier = Modifier.fillMaxWidth()
                                             .clickable { onItemClick(item.book.id) }) {
                                         Text(
-                                            item.book.name.toString(), fontSize = 30.sp,
+                                            item.book.name ?: "Название не указано", fontSize = 30.sp,
                                             textDecoration =
                                                 if(item.book.id == curBookId) TextDecoration.Underline
                                                 else TextDecoration.None

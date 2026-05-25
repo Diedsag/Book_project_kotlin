@@ -39,11 +39,9 @@ class BAViewModel (
         }
         viewModelScope.launch {
             downloadBooksUseCase().collect {elements ->
-                elements.forEach { Log.d("TAG", "el_id:" + it.id.toString()) }
                 booksUiState.value.forEach { if(it is BookUiState.Loading) Log.d("TAG", "bs_id:" + it.id.toString()) }
                 booksUiState.value = booksUiState.value.map { bookUiState ->
                     if(bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
-                        Log.d("TAG", "loading changed: " + bookUiState.id.toString())
                         return@map BookUiState.Success(elements.find{ it.id == bookUiState.id }!!)
                     }
                     return@map bookUiState
@@ -55,9 +53,7 @@ class BAViewModel (
         uri?.let {
             booksUiState.value += BookUiState.Loading(++last_id)
             viewModelScope.launch {
-                scanBookUseCase(it, last_id).onSuccess { id ->
-                    Log.d("TAG", "id:$id")
-                }
+                scanBookUseCase(it)
             }
         }
     }

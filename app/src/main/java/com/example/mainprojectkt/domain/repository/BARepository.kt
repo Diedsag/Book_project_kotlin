@@ -7,7 +7,7 @@ import com.example.mainprojectkt.domain.model.PageWithStyles
 import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
-    suspend fun scanBook(uri: Uri, id: Long): Result<Long>
+    suspend fun scanBook(uri: Uri)
     fun uploadBook(book: Book): Flow<Unit>
     fun downloadBooks(): Flow<List<Book>>
     suspend fun getBookWithPages(bookId: Long): BookWithPages?

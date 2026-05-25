@@ -11,9 +11,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.screen.BABookListScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
+import com.example.mainprojectkt.presentation.ui.screen.BANoteScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
@@ -56,6 +58,19 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             }
 
         }
+        composable(
+            "note/{number}",
+            arguments = listOf(navArgument("number") {type = NavType.IntType}),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "myapp://note/{number}" }
+            )
+        ) {backStackEntry ->
+            val number = backStackEntry.arguments?.getInt("number") ?: return@composable
+            BANoteScreen(
+                "hehe $number",
+                {navController.navigate("home")},
+            )
+        }
         composable("pdf") {
             BAPdfChoiceScreen(
                 viewModel::scanBook,
@@ -67,7 +82,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 booksState,
                 {id -> viewModel.curBookId.value = id
                     viewModel.hasBook.value = true},
-                curBookId
+                {navController.navigate("home")},
+                curBookId,
             )
         }
     }
