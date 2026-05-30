@@ -12,8 +12,10 @@ import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
 import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
@@ -26,34 +28,49 @@ class BAViewModel (
     val updatePageUseCase: UpdatePageUseCase,
 ) : ViewModel(
 ) {
-    var last_id: Long = 0
+    var lastId: Long = 0
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
+    val asyncDownload = viewModelScope.async {
+        downloadBooksUseCase().collect { elements ->
+            booksUiState.value = booksUiState.value.map { bookUiState ->
+                if (bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
+                    return@map BookUiState.Success(elements.find { it.id == bookUiState.id }!!)
+                }
+                return@map bookUiState
+            }
+        }
+    }
+
+
     var curBookId = MutableStateFlow<Long?>(null)
     init{
         viewModelScope.launch {
             downloadBooksUseCase().first().forEach {element ->
-                last_id = element.id
+                lastId = element.id
                 booksUiState.value += BookUiState.Success(element)
             }
         }
         viewModelScope.launch {
-            downloadBooksUseCase().collect {elements ->
-                booksUiState.value.forEach { if(it is BookUiState.Loading) Log.d("TAG", "bs_id:" + it.id.toString()) }
+            /*downloadBooksUseCase().collect {elements ->
                 booksUiState.value = booksUiState.value.map { bookUiState ->
                     if(bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
                         return@map BookUiState.Success(elements.find{ it.id == bookUiState.id }!!)
                     }
                     return@map bookUiState
                 }
-            }
+            }*/
         }
     }
     fun scanBook(uri: Uri?){
-        uri?.let {
-            booksUiState.value += BookUiState.Loading(++last_id)
+        uri?.let { uri ->
+            booksUiState.value += BookUiState.Loading(++lastId)
+            val asyncScan = viewModelScope.async{scanBookUseCase(uri)}
             viewModelScope.launch {
-                scanBookUseCase(it)
+                asyncScan.await()
+            }
+            viewModelScope.launch {
+                asyncDownload.await()
             }
         }
     }

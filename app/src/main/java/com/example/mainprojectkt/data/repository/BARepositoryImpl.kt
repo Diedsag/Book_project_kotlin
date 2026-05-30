@@ -97,7 +97,6 @@ class BARepositoryImpl(
     override fun downloadBooks(): Flow<List<Book>> {
         return database.bookDao().getBooks().map { list -> list.map {book ->
             val pages = database.pageDao().getPagesByBook(book.id)
-            Log.d("TAG", "dB:" + pages.size.toString())
             book.toDomain(pages.map { page ->
                 val styles = database.styleDao().getStylesByPage(page.id)
                 page.toDomain(styles.map{ it.toDomain()}) })
