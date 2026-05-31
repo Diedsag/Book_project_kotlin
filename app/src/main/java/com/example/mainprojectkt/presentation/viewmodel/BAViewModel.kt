@@ -51,16 +51,16 @@ class BAViewModel (
                 booksUiState.value += BookUiState.Success(element)
             }
         }
-        viewModelScope.launch {
-            /*downloadBooksUseCase().collect {elements ->
+        /*viewModelScope.launch {
+            downloadBooksUseCase().collect {elements ->
                 booksUiState.value = booksUiState.value.map { bookUiState ->
                     if(bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
                         return@map BookUiState.Success(elements.find{ it.id == bookUiState.id }!!)
                     }
                     return@map bookUiState
                 }
-            }*/
-        }
+            }
+        }*/
     }
     fun scanBook(uri: Uri?){
         uri?.let { uri ->
@@ -91,30 +91,13 @@ class BAViewModel (
     fun changeLastNum(newLastNum: Int){
         booksUiState.value = booksUiState.value.map {element ->
             if (element is BookUiState.Success && element.book.id == curBookId.value) {
-                element.copy(book = element.book.copy(
-                    lastPage = newLastNum)
-                )
+                val newBook = element.book.copy(lastPage = newLastNum)
+                viewModelScope.launch {
+                    updateBookUseCase(newBook).collect {  }
+                }
+                element.copy(book = newBook)
             }
             else element
-        }
-    }
-    fun uploadBook(book: BookUiState?){
-        if (book != null)
-            uploadBookUseCase((book as BookUiState.Success).book).launchIn(viewModelScope)
-    }
-    fun getCount(){
-        viewModelScope.launch {
-            downloadBooksUseCase().collect { data ->
-                Log.d("TAG", data.size.toString())
-            }
-        }
-    }
-    fun checkRelation(id: Int){
-        viewModelScope.launch {
-            downloadBooksUseCase(id.toLong()).collect {x ->
-                Log.d("TAG", "bm: " + x!!.book.name)
-                Log.d("TAG", "ps: " + x.pages.size.toString())
-            }
         }
     }
 }

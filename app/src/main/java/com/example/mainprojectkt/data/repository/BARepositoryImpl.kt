@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.map
 
 
 fun Book.toEntity() = BookEntity(
-    id = 0,
+    id = id,
     name = name ?: "Название не указано",
     lastPage = lastPage
 )
@@ -109,6 +109,7 @@ class BARepositoryImpl(
     }
 
     override fun updateBook(book: Book): Flow<Unit> = flow {
+        Log.d("TAG", book.lastPage.toString())
         database.bookDao().updateBook(book.toEntity())
     }
     override fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit> = flow {

@@ -51,7 +51,7 @@ class BADataSource(val context: Context) {
                 )
             )
         }
-        emit(Book(-1, pdfDoc.documentInfo.title, pages.toList(), 1))
+        emit(Book(0, pdfDoc.documentInfo.title, pages.toList(), 1))
 
     }.flowOn(Dispatchers.IO)
 }

@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.mainprojectkt.domain.model.Book
+import com.example.mainprojectkt.presentation.ui.screen.BABookDetailScreen
 import com.example.mainprojectkt.presentation.ui.screen.BABookListScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BANoteScreen
@@ -27,14 +28,10 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-            val curBook = booksState.find { it is BookUiState.Success && it.book.id == curBookId }
             BAMainScreen(
                 {request -> if(request.toIntOrNull() != null) navController.navigate("page/${request.toInt()}")},
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
-                viewModel::getCount,
-                {viewModel.uploadBook(curBook)},
-                {viewModel.checkRelation(1)},
                 viewModel.hasBook.collectAsStateWithLifecycle().value,
             )
         }
@@ -56,7 +53,6 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     {navController.navigate("home")}
                 )
             }
-
         }
         composable(
             "note/{number}",
@@ -81,10 +77,35 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             BABookListScreen(
                 booksState,
                 {id -> viewModel.curBookId.value = id
-                    viewModel.hasBook.value = true},
+                    viewModel.hasBook.value = true
+                    navController.navigate("book/$id")
+                },
+                {id -> viewModel.curBookId.value = id
+                    viewModel.hasBook.value = true
+                    booksState.find { it is BookUiState.Success && it.book.id == id }.let {
+                        val curBook = (it as BookUiState.Success).book
+                        navController.navigate("page/${curBook.lastPage}")
+                    }
+                },
                 {navController.navigate("home")},
                 curBookId,
             )
+        }
+        composable(
+            "book/{id}",
+            arguments = listOf(navArgument("id") {type = NavType.LongType})
+        ) {backStackEntry ->
+            val id = backStackEntry.arguments?.getLong("id") ?: return@composable
+            booksState.find { it is BookUiState.Success && it.book.id == id }.let {
+                val foundBook = (it as BookUiState.Success).book
+                BABookDetailScreen(
+                    foundBook,
+                    {num -> navController.navigate("page/${num}")
+                        viewModel.changeLastNum(num)
+                    },
+                    {navController.navigate("home")}
+                )
+            }
         }
     }
 }
