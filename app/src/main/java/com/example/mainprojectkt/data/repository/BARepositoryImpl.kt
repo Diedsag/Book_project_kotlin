@@ -12,6 +12,8 @@ import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.local.entity.BookEntity
 import com.example.mainprojectkt.data.local.entity.PageEntity
 import com.example.mainprojectkt.data.local.entity.StyleEntity
+import com.example.mainprojectkt.data.local.entity.UserBookEntity
+import com.example.mainprojectkt.data.local.entity.UserEntity
 import com.example.mainprojectkt.data.model.BookWithPages
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
@@ -70,8 +72,12 @@ class BARepositoryImpl(
     val database: BADatabase
 ): BARepository{
     override suspend fun scanBook(uri: Uri){
+
+        database.userDao().addUser(UserEntity(1, "Oleg", "hahah")) //DELETE!!!
+
         dataSource.scanBook(uri).collect { book ->
             val bookId = database.bookDao().addBook(book.toEntity())
+            database.userBookDao().addUserBook(UserBookEntity(0, 1, bookId))
             book.pages.forEach{ page ->
                 val pageId = database.pageDao().addPage(page.toEntity(bookId))
                 page.styles.forEach { style ->
@@ -109,9 +115,9 @@ class BARepositoryImpl(
     }
 
     override fun updateBook(book: Book): Flow<Unit> = flow {
-        Log.d("TAG", book.lastPage.toString())
         database.bookDao().updateBook(book.toEntity())
     }
+
     override fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit> = flow {
         page.styles.forEach{style ->
             val st = style.toEntity(
@@ -119,5 +125,9 @@ class BARepositoryImpl(
             Log.d("TAG", st.style)
             database.styleDao().addStyle(st)
         }
+    }
+
+    override fun getBookIdsByUser(userId: Long): Flow<List<Long>> {
+        return database.userBookDao().getBookIdsByUser(userId)
     }
 }

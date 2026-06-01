@@ -58,8 +58,11 @@ fun BABookListScreen(
                 LazyColumn {
                     items(
                         books,
-                        key = {
-                            books.indexOf(it)
+                        key = {state ->
+                            when (state) {
+                                is BookUiState.Loading -> state.id
+                                is BookUiState.Success -> state.book.id
+                            }
                         }
                     ) { item ->
                         when(item){

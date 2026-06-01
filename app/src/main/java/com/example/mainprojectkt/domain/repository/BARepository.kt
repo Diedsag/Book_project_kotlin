@@ -13,4 +13,5 @@ interface BARepository {
     suspend fun getBookWithPages(bookId: Long): BookWithPages?
     fun updateBook(book: Book): Flow<Unit>
     fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit>
+    fun getBookIdsByUser(userId: Long): Flow<List<Long>>
 }

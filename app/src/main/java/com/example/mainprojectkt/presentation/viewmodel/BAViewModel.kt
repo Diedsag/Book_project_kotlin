@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
+import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
@@ -16,8 +17,10 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 
 class BAViewModel (
     val context: Context,
@@ -26,9 +29,11 @@ class BAViewModel (
     val downloadBooksUseCase: DownloadBooksUseCase,
     val updateBookUseCase: UpdateBookUseCase,
     val updatePageUseCase: UpdatePageUseCase,
+    val getUserBooksUseCase: GetUserBooksUseCase
 ) : ViewModel(
 ) {
     var lastId: Long = 0
+    val userId: Long = 1
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
     val asyncDownload = viewModelScope.async {
@@ -46,12 +51,18 @@ class BAViewModel (
     var curBookId = MutableStateFlow<Long?>(null)
     init{
         viewModelScope.launch {
+            getUserBooksUseCase(userId).first().forEach { id ->
+                    booksUiState.value += BookUiState.Loading(id)
+                    Log.d("TAG", "L$id")
+                }
+            }
+        /*viewModelScope.launch {
             downloadBooksUseCase().first().forEach {element ->
                 lastId = element.id
                 booksUiState.value += BookUiState.Success(element)
             }
         }
-        /*viewModelScope.launch {
+        iewModelScope.launch {
             downloadBooksUseCase().collect {elements ->
                 booksUiState.value = booksUiState.value.map { bookUiState ->
                     if(bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
