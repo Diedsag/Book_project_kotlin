@@ -124,12 +124,13 @@ class BAViewModel (
         }
     }
 
-    fun addNote(pageNum: Int, text: String){
+    fun addNote(pageNum: Int, text: String, onResult: (Long) -> Unit) {
         val curBook = booksUiState.value.find { element ->
             (element is BookUiState.Success && element.book.id == curBookId.value)}
         if (curBook is BookUiState.Success){
             viewModelScope.launch {
-                addNoteUseCase(Note(0, curBook.book.id, pageNum, text)).collect {}
+                val noteId = addNoteUseCase(Note(0, curBook.book.id, pageNum, text)).first()
+                onResult(noteId)
             }
         }
     }

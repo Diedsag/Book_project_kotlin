@@ -15,6 +15,6 @@ interface BARepository {
     fun updateBook(book: Book): Flow<Unit>
     fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit>
     fun getBookIdsByUser(userId: Long): Flow<List<Long>>
-    fun addNote(note: Note): Flow<Unit>
+    fun addNote(note: Note): Flow<Long>
     fun getNotes(): Flow<List<Note>>
 }

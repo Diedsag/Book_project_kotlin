@@ -2,6 +2,7 @@ package com.example.mainprojectkt.data.local
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.*
@@ -23,11 +24,13 @@ data class ShiftSizes(
     val topMargin: Float = 100f,
     val bottomMargin: Float = 50f
 )
+
 class BADataSource(
     private val context: Context,
     private val maxConcurrency: Int = Runtime.getRuntime().availableProcessors()
 ) {
     suspend fun getBookInfo(uri: Uri): BookInfo = withContext(Dispatchers.IO) {
+        // без изменений (работает корректно)
         context.contentResolver.openInputStream(uri)?.use { stream ->
             PdfReader(stream).use { reader ->
                 PdfDocument(reader).use { pdfDoc ->
@@ -40,17 +43,25 @@ class BADataSource(
             }
         } ?: BookInfo(null, null)
     }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getPages(uri: Uri): List<PageWithStyles> = flow {
-        val pdfReader = PdfReader(context.contentResolver.openInputStream(uri))
-        val pdfDoc = PdfDocument(pdfReader)
-        val pageCount = pdfDoc.numberOfPages
-        val shiftSizes = ShiftSizes()
-        val strategy = LocationTextExtractionStrategy()
+        // 1. Быстро получаем количество страниц (отдельный короткий вызов)
+        val pageCount = withContext(Dispatchers.IO) {
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                PdfReader(stream).use { reader ->
+                    PdfDocument(reader).use { pdfDoc ->
+                        pdfDoc.numberOfPages
+                    }
+                }
+            } ?: 0
+        }
+
+        // 2. Обрабатываем страницы параллельно, НО с уникальной стратегией на каждую страницу
         (1..pageCount).asFlow()
             .flatMapMerge(concurrency = maxConcurrency) { pageNum ->
                 flow {
-                    emit(scanPage(uri, pageNum, shiftSizes, strategy))
+                    emit(scanPage(uri, pageNum))
                 }.flowOn(Dispatchers.Default)
             }
             .collect { page ->
@@ -58,21 +69,23 @@ class BADataSource(
             }
     }.flowOn(Dispatchers.IO).toList()
 
-    private fun scanPage(
-        uri: Uri,
-        pageNum: Int,
-        shiftSizes: ShiftSizes,
-        strategy: LocationTextExtractionStrategy
-    ): PageWithStyles {
+    private fun scanPage(uri: Uri, pageNum: Int): PageWithStyles {
         val inputStream = context.contentResolver.openInputStream(uri)
             ?: return PageWithStyles(pageNum, "", emptyList())
 
-        inputStream.use { inputStream ->
-            PdfReader(inputStream).use { reader ->
+        inputStream.use { stream ->
+            PdfReader(stream).use { reader ->
                 PdfDocument(reader).use { pdfDoc ->
                     val page = pdfDoc.getPage(pageNum)
                     val pageSize = page.pageSize
 
+                    // Отступы — можно вынести в параметры или сделать настраиваемыми
+                    val shiftSizes = ShiftSizes(
+                        leftMargin = 50f,
+                        rightMargin = 50f,
+                        topMargin = 100f,
+                        bottomMargin = 50f
+                    )
                     val rect = Rectangle(
                         pageSize.left + shiftSizes.leftMargin,
                         pageSize.bottom + shiftSizes.bottomMargin,
@@ -80,9 +93,13 @@ class BADataSource(
                         pageSize.top - shiftSizes.topMargin
                     )
 
+                    // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: новая стратегия для каждой страницы
+                    val strategy = LocationTextExtractionStrategy()
                     val filter = TextRegionEventFilter(rect)
                     val listener = FilteredTextEventListener(strategy, filter)
                     val pageText = PdfTextExtractor.getTextFromPage(page, listener)
+
+                    Log.d("TAG!", "Page $pageNum extracted, length = ${pageText.length}")
                     return PageWithStyles(pageNum, pageText, listOf())
                 }
             }

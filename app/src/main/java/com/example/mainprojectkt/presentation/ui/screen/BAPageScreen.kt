@@ -61,7 +61,7 @@ fun BAPageScreen(
     page: PageWithStyles,
     onMove: (Int) -> Unit,
     onChangeStyle: (PageWithStyles) -> Unit,
-    onAddNote: (Int, String) -> Unit,
+    onAddNote: (Int, String, (Long) -> Unit) -> Unit,
     onBack: () -> Unit
 ){
     val dismissState = rememberSwipeToDismissBoxState(
@@ -147,11 +147,12 @@ fun BAPageScreen(
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    onAddNote(page.number, noteText)
-                                    value = changeValue(value, styleRanges,
-                                        Color.Green, "myapp://note/3")
-                                    onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
-                                    showNoteRedactor = false
+                                    onAddNote(page.number, noteText){
+                                        id -> value = changeValue(value, styleRanges,
+                                        Color.Green, "myapp://note/$id")
+                                        onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
+                                        showNoteRedactor = false
+                                    }
                                 }
                             ) {
                                 Text("OK")

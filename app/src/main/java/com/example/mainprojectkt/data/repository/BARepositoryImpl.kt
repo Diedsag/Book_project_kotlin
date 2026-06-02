@@ -149,11 +149,11 @@ class BARepositoryImpl(
         return database.userBookDao().getBookIdsByUser(userId)
     }
 
-    override fun addNote(note: Note): Flow<Unit> {
+    override fun addNote(note: Note): Flow<Long> {
         return flow{
             val page = database.pageDao().getPageByBookNum(note.bookId, note.pageNum)
-            database.noteDao().addNote(NoteEntity(0, page.id, note.text))
-            emit(Unit)
+            val noteId = database.noteDao().addNote(NoteEntity(0, page.id, note.text))
+            emit(noteId)
         }.flowOn(Dispatchers.IO)
     }
 
