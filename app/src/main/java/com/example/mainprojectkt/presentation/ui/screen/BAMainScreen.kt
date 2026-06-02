@@ -15,23 +15,10 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun BAMainScreen(
-    onClick: (String) -> Unit,
     toPdf: () -> Unit,
     toBooks: () -> Unit,
-    hasBook: Boolean
 ){
-    var number by remember { mutableStateOf("") }
     Column() {
-        TextField(number, { number = it })
-        Row() {
-            Button(onClick = {
-                onClick(number) },
-                enabled = hasBook
-            ) {
-                Text("Страница")
-            }
-            Text(if (hasBook) "" else "Дождитесь загрузки книги")
-        }
         Button(onClick = toPdf) {
             Text("Загрузить PDF")
         }

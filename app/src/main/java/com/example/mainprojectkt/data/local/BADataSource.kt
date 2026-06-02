@@ -2,56 +2,90 @@ package com.example.mainprojectkt.data.local
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.PageWithStyles
-import com.itextpdf.kernel.pdf.PdfDocument
-import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
 import com.itextpdf.kernel.geom.Rectangle
-import com.itextpdf.kernel.pdf.PdfReader
+import com.itextpdf.kernel.pdf.*
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
 import com.itextpdf.kernel.pdf.canvas.parser.filter.TextRegionEventFilter
 import com.itextpdf.kernel.pdf.canvas.parser.listener.FilteredTextEventListener
 import com.itextpdf.kernel.pdf.canvas.parser.listener.LocationTextExtractionStrategy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
-class BADataSource(val context: Context) {
-    fun scanBook(uri: Uri): Flow<Book> = flow{
+data class BookInfo(
+    val title: String?,
+    val author: String?
+)
+
+data class ShiftSizes(
+    val leftMargin: Float = 50f,
+    val rightMargin: Float = 50f,
+    val topMargin: Float = 100f,
+    val bottomMargin: Float = 50f
+)
+class BADataSource(
+    private val context: Context,
+    private val maxConcurrency: Int = Runtime.getRuntime().availableProcessors()
+) {
+    suspend fun getBookInfo(uri: Uri): BookInfo = withContext(Dispatchers.IO) {
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            PdfReader(stream).use { reader ->
+                PdfDocument(reader).use { pdfDoc ->
+                    val info = pdfDoc.documentInfo
+                    BookInfo(
+                        title = info.title,
+                        author = info.getMoreInfo("Author")
+                    )
+                }
+            }
+        } ?: BookInfo(null, null)
+    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun getPages(uri: Uri): List<PageWithStyles> = flow {
         val pdfReader = PdfReader(context.contentResolver.openInputStream(uri))
         val pdfDoc = PdfDocument(pdfReader)
-        val pages = mutableListOf<PageWithStyles>()
+        val pageCount = pdfDoc.numberOfPages
+        val shiftSizes = ShiftSizes()
+        val strategy = LocationTextExtractionStrategy()
+        (1..pageCount).asFlow()
+            .flatMapMerge(concurrency = maxConcurrency) { pageNum ->
+                flow {
+                    emit(scanPage(uri, pageNum, shiftSizes, strategy))
+                }.flowOn(Dispatchers.Default)
+            }
+            .collect { page ->
+                emit(page)
+            }
+    }.flowOn(Dispatchers.IO).toList()
 
-        val leftMargin = 50f
-        val rightMargin = 50f
-        val topMargin = 100f
-        val bottomMargin = 50f
+    private fun scanPage(
+        uri: Uri,
+        pageNum: Int,
+        shiftSizes: ShiftSizes,
+        strategy: LocationTextExtractionStrategy
+    ): PageWithStyles {
+        val inputStream = context.contentResolver.openInputStream(uri)
+            ?: return PageWithStyles(pageNum, "", emptyList())
 
-        var pageSize: Rectangle
-        var rect: Rectangle
-        var filter: TextRegionEventFilter
-        var extractionStrategy: LocationTextExtractionStrategy
-        var listener: FilteredTextEventListener
+        inputStream.use { inputStream ->
+            PdfReader(inputStream).use { reader ->
+                PdfDocument(reader).use { pdfDoc ->
+                    val page = pdfDoc.getPage(pageNum)
+                    val pageSize = page.pageSize
 
-        for (i in 1..pdfDoc.numberOfPages) {
-            pageSize = pdfDoc.getPage(i).pageSize
-            rect = Rectangle(
-                pageSize.left + leftMargin,
-                pageSize.bottom + bottomMargin,
-                pageSize.right - rightMargin,
-                pageSize.top - topMargin
-            )
-            filter = TextRegionEventFilter(rect)
-            extractionStrategy = LocationTextExtractionStrategy()
-            listener = FilteredTextEventListener(extractionStrategy, filter)
-            pages.add(
-                PageWithStyles(
-                    i, PdfTextExtractor.getTextFromPage(pdfDoc.getPage(i), listener), listOf()
-                )
-            )
+                    val rect = Rectangle(
+                        pageSize.left + shiftSizes.leftMargin,
+                        pageSize.bottom + shiftSizes.bottomMargin,
+                        pageSize.right - shiftSizes.rightMargin,
+                        pageSize.top - shiftSizes.topMargin
+                    )
+
+                    val filter = TextRegionEventFilter(rect)
+                    val listener = FilteredTextEventListener(strategy, filter)
+                    val pageText = PdfTextExtractor.getTextFromPage(page, listener)
+                    return PageWithStyles(pageNum, pageText, listOf())
+                }
+            }
         }
-        emit(Book(0, pdfDoc.documentInfo.title, pages.toList(), 1))
-
-    }.flowOn(Dispatchers.IO)
+    }
 }

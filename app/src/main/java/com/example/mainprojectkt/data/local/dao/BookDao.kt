@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookDao {
     @Insert (onConflict = OnConflictStrategy.IGNORE) suspend fun addBook(book: BookEntity): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun addBooks(books: List<BookEntity>): List<Long>
     @Update suspend fun updateBook(book: BookEntity)
     @Delete suspend fun deleteBook(book: BookEntity)
     @Query ("select * from Books") fun getBooks(): Flow<List<BookEntity>>

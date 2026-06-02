@@ -26,13 +26,12 @@ import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val booksState by viewModel.booksUiState.collectAsStateWithLifecycle()
     val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
+    val notesState by viewModel.notesState.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
-                {request -> if(request.toIntOrNull() != null) navController.navigate("page/${request.toInt()}")},
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
-                viewModel.hasBook.collectAsStateWithLifecycle().value,
             )
         }
         composable(
@@ -50,20 +49,22 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                         viewModel.changeLastNum(num)
                     },
                     viewModel::changePage,
+                    viewModel::addNote,
                     {navController.navigate("home")}
                 )
             }
         }
         composable(
-            "note/{number}",
-            arguments = listOf(navArgument("number") {type = NavType.IntType}),
+            "note/{id}",
+            arguments = listOf(navArgument("id") {type = NavType.LongType}),
             deepLinks = listOf(
-                navDeepLink { uriPattern = "myapp://note/{number}" }
+                navDeepLink { uriPattern = "myapp://note/{id}" }
             )
         ) {backStackEntry ->
-            val number = backStackEntry.arguments?.getInt("number") ?: return@composable
+            val id = backStackEntry.arguments?.getLong("id") ?: return@composable
+            val note = notesState.find { it.id == id } ?: return@composable
             BANoteScreen(
-                "hehe $number",
+                note.text,
                 {navController.navigate("home")},
             )
         }

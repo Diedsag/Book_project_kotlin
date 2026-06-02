@@ -10,7 +10,4 @@ import kotlinx.coroutines.flow.flow
 
 class DownloadBooksUseCase(private val repository: BARepository) {
     operator fun invoke(): Flow<List<Book>> = repository.downloadBooks()
-    operator fun invoke(id: Long): Flow<BookWithPages?> = flow {
-            emit(repository.getBookWithPages(id))
-        }
 }

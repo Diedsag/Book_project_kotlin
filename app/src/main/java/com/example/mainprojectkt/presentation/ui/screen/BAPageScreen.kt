@@ -61,6 +61,7 @@ fun BAPageScreen(
     page: PageWithStyles,
     onMove: (Int) -> Unit,
     onChangeStyle: (PageWithStyles) -> Unit,
+    onAddNote: (Int, String) -> Unit,
     onBack: () -> Unit
 ){
     val dismissState = rememberSwipeToDismissBoxState(
@@ -133,22 +134,20 @@ fun BAPageScreen(
                         title = { Text("Заметка") },
                         text = {
                             Column {
-                                Text("Пожалуйста, введите текст ниже:")
-                                Spacer(modifier = Modifier.height(8.dp))
                                 OutlinedTextField(
                                     value = noteText,
                                     onValueChange = { noteText = it },
-                                    label = { Text("Ваш ответ") },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth()
+                                    label = { Text("Текст") },
+                                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                                    maxLines = Int.MAX_VALUE,
+                                    singleLine = false,
                                 )
                             }
                         },
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    // Действие при подтверждении
-                                    Log.d("TAG", "Введённый текст: $noteText")
+                                    onAddNote(page.number, noteText)
                                     value = changeValue(value, styleRanges,
                                         Color.Green, "myapp://note/3")
                                     onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
@@ -161,7 +160,7 @@ fun BAPageScreen(
                         dismissButton = {
                             TextButton(
                                 onClick = {
-                                    noteText = ""  // Очистить при отмене (опционально)
+                                    noteText = ""
                                     showNoteRedactor = false
                                 }
                             ) {

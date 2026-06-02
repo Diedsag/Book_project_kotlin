@@ -1,5 +1,6 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ fun BANoteScreen(
     text: String,
     onBack: () -> Unit
 ){
+    Log.d("TAG", "Note")
     Scaffold(
         bottomBar = {
             Column() {

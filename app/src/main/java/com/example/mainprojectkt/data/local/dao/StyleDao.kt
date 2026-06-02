@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface StyleDao {
     @Insert (onConflict = OnConflictStrategy.IGNORE) suspend fun addStyle(style: StyleEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun addStyles(styles: List<StyleEntity>)
     @Update suspend fun updateStyle(style: StyleEntity)
     @Delete suspend fun deleteStyle(style: StyleEntity)
     @Query ("select * from Styles") fun getStyles(): Flow<List<StyleEntity>>
