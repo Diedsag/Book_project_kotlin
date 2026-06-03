@@ -52,10 +52,13 @@ class BAViewModel (
             downloadBooksUseCase().collect { elements ->
                 booksUiState.value = booksUiState.value.map { bookUiState ->
                     if (bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
+                        lastId.set(bookUiState.id)
                         return@map BookUiState.Success(elements.find { it.id == bookUiState.id }!!)
                     }
                     return@map bookUiState
                 }
+
+                
             }
         }
         viewModelScope.launch {
@@ -63,30 +66,15 @@ class BAViewModel (
                notesState.value = it
             }
         }
-        /*viewModelScope.launch {
-            downloadBooksUseCase().collect { elements ->
-                booksUiState.value = booksUiState.value.map { bookUiState ->
-                    if (bookUiState is BookUiState.Loading && bookUiState.id in elements.map { it.id }) {
-                        lastId = bookUiState.id
-                        return@map BookUiState.Success(elements.find { it.id == bookUiState.id }!!)
-                    }
-                    return@map bookUiState
-                }
-            }
-        }*/
         viewModelScope.launch {
             getUserBooksUseCase(userId).collect { it.forEach { id ->
                 if (booksUiState.value.find { bookUiState ->
                         (bookUiState is BookUiState.Loading && bookUiState.id == id)
                             || (bookUiState is BookUiState.Success && bookUiState.book.id == id)} == null) {
-                    booksUiState.value += BookUiState.Loading(id)
+                        booksUiState.value += BookUiState.Loading(id)
                     }
                 }
-                booksUiState.value.forEach { bookUiState ->
-                    if (bookUiState is BookUiState.Loading) Log.d("TAG", "L" + bookUiState.id.toString())
-                    if (bookUiState is BookUiState.Success) Log.d("TAG", "B" + bookUiState.book.id.toString())
-                }
-                Log.d("TAG", "----")
+                
             }
         }
     }
