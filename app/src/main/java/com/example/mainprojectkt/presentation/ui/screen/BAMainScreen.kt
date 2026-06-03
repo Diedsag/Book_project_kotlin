@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 fun BAMainScreen(
     toPdf: () -> Unit,
     toBooks: () -> Unit,
+    toRegister: () -> Unit
 ){
     Column() {
         Button(onClick = toPdf) {
@@ -24,6 +25,9 @@ fun BAMainScreen(
         }
         Button(onClick = toBooks) {
             Text("Выбрать книги")
+        }
+        Button(onClick = toRegister) {
+            Text("Зарегистрироваться")
         }
     }
 }

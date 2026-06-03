@@ -3,12 +3,17 @@ package com.example.mainprojectkt.presentation.viewmodel
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mainprojectkt.BookApplication
+import com.example.mainprojectkt.data.model.User
+import com.example.mainprojectkt.data.preferences.PreferencesKeys
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.usecase.AddNoteUseCase
+import com.example.mainprojectkt.domain.usecase.AddUserUseCase
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetNoteUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
@@ -23,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
@@ -38,16 +44,31 @@ class BAViewModel (
     val updatePageUseCase: UpdatePageUseCase,
     val getUserBooksUseCase: GetUserBooksUseCase,
     val addNoteUseCase: AddNoteUseCase,
-    val getNoteUseCase: GetNoteUseCase
+    val getNoteUseCase: GetNoteUseCase,
+    val addUserUseCase: AddUserUseCase
 ) : ViewModel(
 ) {
     var lastId = AtomicLong(0)
-    val userId: Long = 1
+    val userId: MutableStateFlow<Long> = MutableStateFlow(-1)
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     var notesState: MutableStateFlow<List<Note>> = MutableStateFlow(listOf())
     val hasBook = MutableStateFlow(false)
     var curBookId = MutableStateFlow<Long?>(null)
+    private val dataStore = (context.applicationContext as BookApplication).dataStore
     init{
+        viewModelScope.launch {
+            dataStore.data.collect { account ->
+                userId.value = account[PreferencesKeys.USER_ID] ?: -1
+            }
+        }
+        viewModelScope.launch {
+            userId.collect { id ->
+                Log.d("TAG", id.toString())
+                dataStore.edit { account ->
+                    account[PreferencesKeys.USER_ID] = id
+                }
+            }
+        }
         viewModelScope.launch {
             downloadBooksUseCase().collect { elements ->
                 booksUiState.value = booksUiState.value.map { bookUiState ->
@@ -57,8 +78,6 @@ class BAViewModel (
                     }
                     return@map bookUiState
                 }
-
-                
             }
         }
         viewModelScope.launch {
@@ -67,15 +86,30 @@ class BAViewModel (
             }
         }
         viewModelScope.launch {
-            getUserBooksUseCase(userId).collect { it.forEach { id ->
-                if (booksUiState.value.find { bookUiState ->
-                        (bookUiState is BookUiState.Loading && bookUiState.id == id)
-                            || (bookUiState is BookUiState.Success && bookUiState.book.id == id)} == null) {
+            userId.flatMapLatest { id ->
+                getUserBooksUseCase(id)
+            }.collect { ids ->
+                ids.forEach { id ->
+                    if (booksUiState.value.find { bookUiState ->
+                            (bookUiState is BookUiState.Loading && bookUiState.id == id)
+                                    || (bookUiState is BookUiState.Success && bookUiState.book.id == id)
+                        } == null) {
+                        Log.d("TAG", "asked for id $id")
                         booksUiState.value += BookUiState.Loading(id)
                     }
                 }
-                
             }
+            /*userId.value.let{ id -> getUserBooksUseCase(id).collect {
+                it.forEach { id ->
+                    if (booksUiState.value.find { bookUiState ->
+                            (bookUiState is BookUiState.Loading && bookUiState.id == id)
+                                    || (bookUiState is BookUiState.Success && bookUiState.book.id == id)
+                        } == null) {
+                        booksUiState.value += BookUiState.Loading(id)
+                    }
+                }
+            }
+            }*/
         }
     }
     fun scanBook(uri: Uri?) {
@@ -83,7 +117,7 @@ class BAViewModel (
             val newId = lastId.incrementAndGet()
             booksUiState.value += BookUiState.Loading(newId)
             viewModelScope.launch(Dispatchers.IO) {
-                scanBookUseCase(uri)
+                    scanBookUseCase(uri, userId.value)
             }
         }
     }
@@ -119,6 +153,15 @@ class BAViewModel (
             viewModelScope.launch {
                 val noteId = addNoteUseCase(Note(0, curBook.book.id, pageNum, text)).first()
                 onResult(noteId)
+            }
+        }
+    }
+
+    fun register(user: User){
+        booksUiState.value = listOf()
+        viewModelScope.launch {
+            addUserUseCase(user).collect{
+                userId.value = it
             }
         }
     }

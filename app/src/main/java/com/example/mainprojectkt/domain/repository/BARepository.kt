@@ -2,13 +2,14 @@ package com.example.mainprojectkt.domain.repository
 
 import android.net.Uri
 import com.example.mainprojectkt.data.model.BookWithPages
+import com.example.mainprojectkt.data.model.User
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
-    suspend fun scanBook(uri: Uri)
+    suspend fun scanBook(uri: Uri, userId: Long)
     fun uploadBook(book: Book): Flow<Unit>
     fun downloadBooks(): Flow<List<Book>>
     suspend fun getBookWithPages(bookId: Long): BookWithPages?
@@ -17,4 +18,5 @@ interface BARepository {
     fun getBookIdsByUser(userId: Long): Flow<List<Long>>
     fun addNote(note: Note): Flow<Long>
     fun getNotes(): Flow<List<Note>>
+    fun addUser(user: User): Flow<Long>
 }

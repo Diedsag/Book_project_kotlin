@@ -19,6 +19,7 @@ import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BANoteScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
+import com.example.mainprojectkt.presentation.ui.screen.BARegisterScreen
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 
@@ -32,6 +33,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             BAMainScreen(
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
+                {navController.navigate("register")}
             )
         }
         composable(
@@ -107,6 +109,12 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     {navController.navigate("home")}
                 )
             }
+        }
+        composable("register") {
+            BARegisterScreen(
+                {navController.navigate("home")},
+                viewModel::register
+            )
         }
     }
 }

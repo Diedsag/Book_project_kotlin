@@ -15,6 +15,7 @@ import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.usecase.AddNoteUseCase
+import com.example.mainprojectkt.domain.usecase.AddUserUseCase
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetNoteUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
         val getUserBooksUseCase = GetUserBooksUseCase(repository)
         val addNoteUseCase = AddNoteUseCase(repository)
         val getNoteUseCase = GetNoteUseCase(repository)
+        val addUserUseCase = AddUserUseCase(repository)
 
         val viewModel = BAViewModel(
             applicationContext,
@@ -56,7 +58,8 @@ class MainActivity : ComponentActivity() {
             updatePageUseCase,
             getUserBooksUseCase,
             addNoteUseCase,
-            getNoteUseCase
+            getNoteUseCase,
+            addUserUseCase
         )
         setContent {
             navController = rememberNavController()

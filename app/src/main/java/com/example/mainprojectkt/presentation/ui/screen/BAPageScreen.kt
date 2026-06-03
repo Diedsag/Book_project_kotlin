@@ -53,8 +53,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
-import com.itextpdf.text.pdf.TextField
-
 @Composable
 fun BAPageScreen(
     n_pages: Int,

@@ -17,6 +17,7 @@ import com.example.mainprojectkt.data.local.entity.StyleEntity
 import com.example.mainprojectkt.data.local.entity.UserBookEntity
 import com.example.mainprojectkt.data.local.entity.UserEntity
 import com.example.mainprojectkt.data.model.BookWithPages
+import com.example.mainprojectkt.data.model.User
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
@@ -55,6 +56,12 @@ fun StyleRange.toEntity(pageId: Long) = StyleEntity(
     link = link
 )
 
+fun User.toEntity() = UserEntity(
+    id = id,
+    name = name,
+    hashedPassword = hashedPassword
+)
+
 fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
     id = id,
     name = name,
@@ -82,10 +89,7 @@ class BARepositoryImpl(
     val dataSource: BADataSource,
     val database: BADatabase
 ): BARepository{
-    override suspend fun scanBook(uri: Uri) {
-
-        database.userDao().addUser(UserEntity(1, "Oleg", "hahah")) //DELETE!!!
-
+    override suspend fun scanBook(uri: Uri, userId: Long) {
         val info = dataSource.getBookInfo(uri)
         val pages = dataSource.getPages(uri)
         database.withTransaction {
@@ -97,7 +101,7 @@ class BARepositoryImpl(
             )
             val bookId = database.bookDao().addBook(book.toEntity())
 
-            database.userBookDao().addUserBook(UserBookEntity(0, 1, bookId))
+            database.userBookDao().addUserBook(UserBookEntity(0, userId, bookId))
 
             val pageEntities = pages.map { page ->
                 page.toEntity(bookId)
@@ -163,6 +167,13 @@ class BARepositoryImpl(
                 val pageEntity = database.pageDao().getPage(noteEntity.pageId)
                 Note(noteEntity.id, pageEntity.bookId, pageEntity.number, noteEntity.text)
             }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    override fun addUser(user: User): Flow<Long> {
+        return flow{
+            val userId = database.userDao().addUser(user.toEntity())
+            emit(userId)
         }.flowOn(Dispatchers.IO)
     }
 }
