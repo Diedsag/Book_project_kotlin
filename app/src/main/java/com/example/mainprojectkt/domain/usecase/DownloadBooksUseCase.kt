@@ -9,5 +9,5 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 
 class DownloadBooksUseCase(private val repository: BARepository) {
-    operator fun invoke(): Flow<List<Book>> = repository.downloadBooks()
+    operator fun invoke(userId: Long): Flow<List<Book>> = repository.downloadBooks(userId)
 }

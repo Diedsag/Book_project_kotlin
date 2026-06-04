@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface BARepository {
     suspend fun scanBook(uri: Uri, userId: Long)
     fun uploadBook(book: Book): Flow<Unit>
-    fun downloadBooks(): Flow<List<Book>>
+    fun downloadBooks(userId: Long): Flow<List<Book>>
     suspend fun getBookWithPages(bookId: Long): BookWithPages?
     fun updateBook(book: Book): Flow<Unit>
     fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit>
@@ -19,4 +19,5 @@ interface BARepository {
     fun addNote(note: Note): Flow<Long>
     fun getNotes(): Flow<List<Note>>
     fun addUser(user: User): Flow<Long>
+    fun getUser(email: String): Flow<User?>
 }

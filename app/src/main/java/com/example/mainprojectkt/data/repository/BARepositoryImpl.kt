@@ -58,6 +58,7 @@ fun StyleRange.toEntity(pageId: Long) = StyleEntity(
 
 fun User.toEntity() = UserEntity(
     id = id,
+    email = email,
     name = name,
     hashedPassword = hashedPassword
 )
@@ -77,6 +78,13 @@ fun StyleEntity.toDomain() = StyleRange(
     textRange = TextRange(start, end),
     spanStyle = SpanStyle(background = Color(style.toColorInt())),
     link = link
+)
+
+fun UserEntity.toDomain() = User(
+    id = id,
+    email = email,
+    name = name,
+    hashedPassword = hashedPassword
 )
 
 /*fun PageDto.toEntity(bookId: Long) = PageEntity(
@@ -123,8 +131,8 @@ class BARepositoryImpl(
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun downloadBooks(): Flow<List<Book>> {
-        return database.bookDao().getBooks().map { list -> list.map {book ->
+    override fun downloadBooks(userId: Long): Flow<List<Book>> {
+        return database.bookDao().getBooksByUser(userId).map { list -> list.map {book ->
             val pages = database.pageDao().getPagesByBook(book.id)
             book.toDomain(pages.map { page ->
                 val styles = database.styleDao().getStylesByPage(page.id)
@@ -175,5 +183,9 @@ class BARepositoryImpl(
             val userId = database.userDao().addUser(user.toEntity())
             emit(userId)
         }.flowOn(Dispatchers.IO)
+    }
+
+    override fun getUser(email: String): Flow<User?> {
+        return database.userDao().getUserByEmail(email).map{it?.toDomain()}
     }
 }

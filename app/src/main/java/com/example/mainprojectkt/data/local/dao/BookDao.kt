@@ -22,4 +22,11 @@ interface BookDao {
     @Transaction
     @Query("SELECT * FROM Books WHERE id = :bookId")
     suspend fun getBookWithPages(bookId: Long): BookWithPages?
+
+    @Query("""
+    SELECT * FROM Books book
+    INNER JOIN UserBooks userBook ON book.id = userBook.bookId
+    WHERE userBook.userId = :userId
+""")
+    fun getBooksByUser(userId: Long): Flow<List<BookEntity>>
 }

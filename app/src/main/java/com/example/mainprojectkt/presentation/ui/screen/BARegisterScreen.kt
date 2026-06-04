@@ -1,5 +1,6 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
+import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,13 +42,14 @@ import org.mindrot.jbcrypt.BCrypt
 @Composable
 fun BARegisterScreen(
     onBack: () -> Unit,
-    onAdd: (User) -> Unit
+    onAdd: (User, (Boolean) -> Unit) -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     var repeatPasswordVisible by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     Scaffold(
         bottomBar = {
@@ -70,6 +72,12 @@ fun BARegisterScreen(
                 value = name,
                 onValueChange = { name = it},
                 label = { Text("Имя") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it},
+                label = { Text("Почта") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
@@ -121,9 +129,21 @@ fun BARegisterScreen(
                     else if(!Regex("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)){
                         errorMessage = "Пароль не содержит специальных символов."
                     }
+                    else if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
+                        errorMessage = "Не все данные введены."
+                    }
+                    else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                    {
+                        errorMessage = "Почта введена не корректна."
+                    }
                     else {
-                        onAdd(User(0, name, BCrypt.hashpw(password, BCrypt.gensalt())))
-                        onBack()
+                        onAdd(User(0, email, name, BCrypt.hashpw(password, BCrypt.gensalt()))){
+                            result ->
+                            if (result)
+                                onBack()
+                            else
+                                errorMessage = "Почта уже зарегистрирована."
+                        }
                     }
                 }) {
                     Text("Зарегистрироваться")

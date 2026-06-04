@@ -15,6 +15,7 @@ import androidx.navigation.navDeepLink
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.screen.BABookDetailScreen
 import com.example.mainprojectkt.presentation.ui.screen.BABookListScreen
+import com.example.mainprojectkt.presentation.ui.screen.BALoginScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BANoteScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
@@ -28,12 +29,15 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val booksState by viewModel.booksUiState.collectAsStateWithLifecycle()
     val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
     val notesState by viewModel.notesState.collectAsStateWithLifecycle()
+    val userId by viewModel.userId.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
                 {navController.navigate("pdf")},
                 {navController.navigate("books")},
-                {navController.navigate("register")}
+                {navController.navigate("register")},
+                {navController.navigate("login")},
+                userId != -1L
             )
         }
         composable(
@@ -80,11 +84,9 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             BABookListScreen(
                 booksState,
                 {id -> viewModel.curBookId.value = id
-                    viewModel.hasBook.value = true
                     navController.navigate("book/$id")
                 },
                 {id -> viewModel.curBookId.value = id
-                    viewModel.hasBook.value = true
                     booksState.find { it is BookUiState.Success && it.book.id == id }.let {
                         val curBook = (it as BookUiState.Success).book
                         navController.navigate("page/${curBook.lastPage}")
@@ -114,6 +116,12 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             BARegisterScreen(
                 {navController.navigate("home")},
                 viewModel::register
+            )
+        }
+        composable("login") {
+            BALoginScreen(
+                {navController.navigate("home")},
+                viewModel::login
             )
         }
     }
