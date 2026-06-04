@@ -25,7 +25,7 @@ import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
 import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
-import com.example.mainprojectkt.presentation.theme.MainProjectKtTheme
+import com.example.mainprojectkt.presentation.theme.AppTheme
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 class MainActivity : ComponentActivity() {
@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             navController = rememberNavController()
-            MainProjectKtTheme {
+            AppTheme {
                 Scaffold() { paddingValues ->
                     Box(
                         modifier = Modifier
