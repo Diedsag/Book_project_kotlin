@@ -2,7 +2,6 @@ package com.example.mainprojectkt.presentation.viewmodel
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,8 +13,9 @@ import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.usecase.AddNoteUseCase
 import com.example.mainprojectkt.domain.usecase.AddUserUseCase
+import com.example.mainprojectkt.domain.usecase.DeleteNoteUseCase
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
-import com.example.mainprojectkt.domain.usecase.GetNoteUseCase
+import com.example.mainprojectkt.domain.usecase.GetNotesUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
@@ -43,7 +43,8 @@ class BAViewModel (
     val updatePageUseCase: UpdatePageUseCase,
     val getUserBooksUseCase: GetUserBooksUseCase,
     val addNoteUseCase: AddNoteUseCase,
-    val getNoteUseCase: GetNoteUseCase,
+    val getNotesUseCase: GetNotesUseCase,
+    val deleteNoteUseCase: DeleteNoteUseCase,
     val addUserUseCase: AddUserUseCase,
     val getUserUseCase: GetUserUseCase
 ) : ViewModel(
@@ -89,7 +90,7 @@ class BAViewModel (
         }
 
         viewModelScope.launch {
-            getNoteUseCase().collect{
+            getNotesUseCase().collect{
                 notesState.value = it
             }
         }
@@ -135,14 +136,20 @@ class BAViewModel (
         }
     }
 
-    fun addNote(pageNum: Int, text: String, onResult: (Long) -> Unit) {
+    fun addNote(pageId: Long, text: String, onResult: (Long) -> Unit) {
         val curBook = booksUiState.value.find { element ->
             (element is BookUiState.Success && element.book.id == curBookId.value)}
         if (curBook is BookUiState.Success){
             viewModelScope.launch {
-                val noteId = addNoteUseCase(Note(0, curBook.book.id, pageNum, text)).first()
+                val noteId = addNoteUseCase(Note(0, pageId, text)).first()
                 onResult(noteId)
             }
+        }
+    }
+
+    fun deleteNote(id: Long) {
+        viewModelScope.launch {
+            deleteNoteUseCase(id).collect {}
         }
     }
 

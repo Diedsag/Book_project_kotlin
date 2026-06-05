@@ -56,7 +56,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     },
                     viewModel::changePage,
                     viewModel::addNote,
-                    {navController.navigate("home")}
+                    {navController.navigate("home")},
+                    viewModel::deleteNote
                 )
             }
         }

@@ -51,16 +51,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 @Composable
 fun BAPageScreen(
-    n_pages: Int,
+    nPages: Int,
     page: PageWithStyles,
     onMove: (Int) -> Unit,
     onChangeStyle: (PageWithStyles) -> Unit,
-    onAddNote: (Int, String, (Long) -> Unit) -> Unit,
-    onBack: () -> Unit
+    onAddNote: (Long, String, (Long) -> Unit) -> Unit,
+    onBack: () -> Unit,
+    onDeleteNote: (Long) -> Unit
 ){
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
@@ -68,7 +70,7 @@ fun BAPageScreen(
                 onMove(page.number - 1)
                 true
             } else {
-                if (dismissValue == SwipeToDismissBoxValue.EndToStart && page.number < n_pages){
+                if (dismissValue == SwipeToDismissBoxValue.EndToStart && page.number < nPages){
                     onMove(page.number + 1)
                     true
                 }
@@ -100,8 +102,8 @@ fun BAPageScreen(
                     Slider(
                         value = sliderPosition,
                         onValueChange = { onMove(it.toInt()) },
-                        valueRange = 1f..n_pages.toFloat(),
-                        steps = n_pages - 1
+                        valueRange = 1f..nPages.toFloat(),
+                        steps = nPages - 1
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -145,7 +147,7 @@ fun BAPageScreen(
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    onAddNote(page.number, noteText){
+                                    onAddNote(page.id, noteText){
                                         id -> value = changeValue(value, styleRanges,
                                         Color.Green, "myapp://note/$id")
                                         onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
@@ -199,7 +201,8 @@ fun BAPageScreen(
                                 close()
                             }
                             item(key = "Note", label = "Убрать заметку") {
-                                showNoteRedactor = true
+                                deleteNote(value, styleRanges){id -> onDeleteNote(id)}
+                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
                                 close()
                             }
                         }
@@ -260,7 +263,7 @@ fun cutSticker(value: TextFieldValue,
         val end = style.textRange.end
         val tStart = textRange.start
         val tEnd = textRange.end
-        if (end <= tStart || start >= tEnd)
+        if (end <= tStart || start >= tEnd || style.link != null)
             newStyleRanges.add(style)
         else {
             if (start < tStart) {
@@ -273,6 +276,42 @@ fun cutSticker(value: TextFieldValue,
     }
     styleRanges.clear()
     styleRanges.addAll(newStyleRanges)
+    val newString = buildAnnotatedString {
+        append(value.text)
+        styleRanges.forEach { styleRange ->
+            addStyle(
+                styleRange.spanStyle,
+                styleRange.textRange.start,
+                styleRange.textRange.end
+            )
+            styleRange.link?.let{
+                addLink(
+                    LinkAnnotation.Url(styleRange.link),
+                    styleRange.textRange.start,
+                    styleRange.textRange.end
+                )
+            }
+        }
+    }
+    return TextFieldValue(newString, value.selection)
+}
+
+
+fun deleteNote(value: TextFieldValue,
+               styleRanges: MutableList<StyleRange>,
+               onDelete: (Long) -> Unit): TextFieldValue{
+    val textRange = value.selection
+    val iterator = styleRanges.iterator()
+    while (iterator.hasNext()) {
+        val styleRange = iterator.next()
+        if (styleRange.link != null){
+            if (textRange.intersects(styleRange.textRange)){
+                val id = styleRange.link.removeSurrounding(prefix = "myapp://note/", suffix = "").toLong()
+                onDelete(id)
+                iterator.remove()
+            }
+        }
+    }
     val newString = buildAnnotatedString {
         append(value.text)
         styleRanges.forEach { styleRange ->

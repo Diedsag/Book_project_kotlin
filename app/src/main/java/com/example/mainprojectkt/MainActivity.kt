@@ -16,8 +16,9 @@ import com.example.mainprojectkt.data.local.BADatabase
 import com.example.mainprojectkt.data.repository.BARepositoryImpl
 import com.example.mainprojectkt.domain.usecase.AddNoteUseCase
 import com.example.mainprojectkt.domain.usecase.AddUserUseCase
+import com.example.mainprojectkt.domain.usecase.DeleteNoteUseCase
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
-import com.example.mainprojectkt.domain.usecase.GetNoteUseCase
+import com.example.mainprojectkt.domain.usecase.GetNotesUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
@@ -47,7 +48,8 @@ class MainActivity : ComponentActivity() {
         val updatePageUseCase = UpdatePageUseCase(repository)
         val getUserBooksUseCase = GetUserBooksUseCase(repository)
         val addNoteUseCase = AddNoteUseCase(repository)
-        val getNoteUseCase = GetNoteUseCase(repository)
+        val getNotesUseCase = GetNotesUseCase(repository)
+        val deleteNoteUseCase = DeleteNoteUseCase(repository)
         val addUserUseCase = AddUserUseCase(repository)
         val getUserUseCase = GetUserUseCase(repository)
 
@@ -60,7 +62,8 @@ class MainActivity : ComponentActivity() {
             updatePageUseCase,
             getUserBooksUseCase,
             addNoteUseCase,
-            getNoteUseCase,
+            getNotesUseCase,
+            deleteNoteUseCase,
             addUserUseCase,
             getUserUseCase
         )

@@ -63,6 +63,12 @@ fun User.toEntity() = UserEntity(
     hashedPassword = hashedPassword
 )
 
+fun Note.toEntity() = NoteEntity(
+    id = id,
+    pageId = pageId,
+    text = text
+)
+
 fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
     id = id,
     name = name,
@@ -86,6 +92,12 @@ fun UserEntity.toDomain() = User(
     email = email,
     name = name,
     hashedPassword = hashedPassword
+)
+
+fun NoteEntity.toDomain() = Note(
+    id = id,
+    pageId = pageId,
+    text = text
 )
 
 /*fun PageDto.toEntity(bookId: Long) = PageEntity(
@@ -164,20 +176,21 @@ class BARepositoryImpl(
 
     override fun addNote(note: Note): Flow<Long> {
         return flow{
-            val page = database.pageDao().getPageByBookNum(note.bookId, note.pageNum)
-            val noteId = database.noteDao().addNote(NoteEntity(0, page.id, note.text))
+            val noteId = database.noteDao().addNote(note.toEntity())
             emit(noteId)
         }.flowOn(Dispatchers.IO)
     }
 
     override fun getNotes(): Flow<List<Note>> {
-        return database.noteDao().getNotes().map {
-            it.map { noteEntity ->
-                val pageEntity = database.pageDao().getPage(noteEntity.pageId)
-                Note(noteEntity.id, pageEntity.bookId, pageEntity.number, noteEntity.text)
-            }
+        return database.noteDao().getNotes().map {notes ->
+            notes.map { it.toDomain() }
         }.flowOn(Dispatchers.IO)
     }
+
+    override fun deleteNote(id: Long) = flow{
+        database.noteDao().deleteNote(id)
+        emit(Unit)
+    }.flowOn(Dispatchers.IO)
 
     override fun addUser(user: User): Flow<Long> {
         return flow{

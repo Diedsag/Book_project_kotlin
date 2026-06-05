@@ -19,6 +19,7 @@ interface BARepository {
     fun getBookIdsByUser(userId: Long): Flow<List<Long>>
     fun addNote(note: Note): Flow<Long>
     fun getNotes(): Flow<List<Note>>
+    fun deleteNote(id: Long): Flow<Unit>
     fun addUser(user: User): Flow<Long>
     fun getUser(email: String): Flow<User?>
 }
