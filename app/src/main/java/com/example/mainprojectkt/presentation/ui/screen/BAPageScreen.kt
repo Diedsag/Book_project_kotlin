@@ -148,7 +148,7 @@ fun BAPageScreen(
                                     onAddNote(page.number, noteText){
                                         id -> value = changeValue(value, styleRanges,
                                         Color.Green, "myapp://note/$id")
-                                        onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
+                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
                                         showNoteRedactor = false
                                     }
                                 }
@@ -182,19 +182,23 @@ fun BAPageScreen(
                         .fillMaxWidth()
                         .appendTextContextMenuComponents {
                             separator()
-                            item(key = "Blue", label = "Синий") {
+                            item(key = "Add", label = "Добавить стикер") {
                                 value = changeValue(value, styleRanges, Color.Blue, null)
-                                onChangeStyle(PageWithStyles(page.number, value.text, styleRanges))
+                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
                                 close()
                             }
                             separator()
-                            item(key = "Yellow", label = "Желтый") {
-                                value = changeValue(value, styleRanges, Color.Yellow, null)
-                                onChangeStyle(PageWithStyles(page.number,value.text, styleRanges))
+                            item(key = "Delete", label = "Убрать стикер") {
+                                value = cutSticker(value, styleRanges)
+                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
                                 close()
                             }
                             separator()
                             item(key = "Note", label = "Добавить заметку") {
+                                showNoteRedactor = true
+                                close()
+                            }
+                            item(key = "Note", label = "Убрать заметку") {
                                 showNoteRedactor = true
                                 close()
                             }
@@ -216,7 +220,7 @@ fun BAPageScreen(
 fun changeValue(value: TextFieldValue,
                 styleRanges: MutableList<StyleRange>,
                 color: Color?,
-                link: String?) : TextFieldValue{
+                link: String?): TextFieldValue{
     color?.let{
         val newStyleRange = StyleRange(
             TextRange(
@@ -225,11 +229,50 @@ fun changeValue(value: TextFieldValue,
             SpanStyle(background = it),
             link
         )
-        if (styleRanges.contains(newStyleRange))
-            styleRanges.remove(newStyleRange)
-        else
-            styleRanges.add(newStyleRange)
+        styleRanges.add(newStyleRange)
     }
+    val newString = buildAnnotatedString {
+        append(value.text)
+        styleRanges.forEach { styleRange ->
+            addStyle(
+                styleRange.spanStyle,
+                styleRange.textRange.start,
+                styleRange.textRange.end
+            )
+            styleRange.link?.let{
+                addLink(
+                    LinkAnnotation.Url(styleRange.link),
+                    styleRange.textRange.start,
+                    styleRange.textRange.end
+                )
+            }
+        }
+    }
+    return TextFieldValue(newString, value.selection)
+}
+
+fun cutSticker(value: TextFieldValue,
+               styleRanges: MutableList<StyleRange>): TextFieldValue{
+    val textRange = value.selection
+    val newStyleRanges = mutableListOf<StyleRange>()
+    for (style in styleRanges) {
+        val start = style.textRange.start
+        val end = style.textRange.end
+        val tStart = textRange.start
+        val tEnd = textRange.end
+        if (end <= tStart || start >= tEnd)
+            newStyleRanges.add(style)
+        else {
+            if (start < tStart) {
+                newStyleRanges.add(style.copy(textRange = TextRange(start, tStart)))
+            }
+            if (end > tEnd) {
+                newStyleRanges.add(style.copy(textRange = TextRange(tEnd, end)))
+            }
+        }
+    }
+    styleRanges.clear()
+    styleRanges.addAll(newStyleRanges)
     val newString = buildAnnotatedString {
         append(value.text)
         styleRanges.forEach { styleRange ->

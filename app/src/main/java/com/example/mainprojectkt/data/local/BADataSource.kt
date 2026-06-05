@@ -74,7 +74,7 @@ class BADataSource(
                     val filter = TextRegionEventFilter(rect)
                     val listener = FilteredTextEventListener(strategy, filter)
                     val pageText = PdfTextExtractor.getTextFromPage(page, listener)
-                    return PageWithStyles(pageNum, pageText, listOf())
+                    return PageWithStyles(0, pageNum, pageText, listOf())
                 }
             }
         }

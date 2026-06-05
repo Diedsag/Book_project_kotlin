@@ -106,17 +106,22 @@ class BAViewModel (
         }
     }
     fun changePage(newPage: PageWithStyles){
-        booksUiState.value = booksUiState.value.map {element ->
+        booksUiState.value = booksUiState.value.map { element ->
             if (element is BookUiState.Success && element.book.id == curBookId.value) {
+                val oldPage = element.book.pages[newPage.number - 1]
+                val newPageCopy = newPage.copy(
+                    styles = newPage.styles.toList()
+                )
+                val added = newPageCopy.styles.filterNot { oldPage.styles.contains(it) }
+                val deleted = oldPage.styles.filterNot { newPageCopy.styles.contains(it) }
                 val newBook: Book = element.book.copy(
                     pages = element.book.pages.toMutableList().apply {
-                        set(newPage.number - 1, newPage)
+                        set(newPage.number - 1, newPageCopy)
                     }
                 )
-                updatePageUseCase(curBookId.value!!, newPage).launchIn(viewModelScope)
+                updatePageUseCase(newPageCopy.id, added, deleted).launchIn(viewModelScope)
                 element.copy(book = newBook)
-            }
-            else element
+            } else element
         }
     }
     fun changeLastNum(newLastNum: Int){

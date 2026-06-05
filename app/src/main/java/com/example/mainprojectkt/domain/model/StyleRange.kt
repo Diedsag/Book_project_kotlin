@@ -4,7 +4,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 
 data class StyleRange(
-    val textRange: TextRange,
+    var textRange: TextRange,
     val spanStyle: SpanStyle,
     val link: String?
 )

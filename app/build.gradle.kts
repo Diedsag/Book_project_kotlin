@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.jbcrypt)
     implementation(libs.gson)
     implementation(libs.androidx.datastore.preferences)
+    implementation("com.godaddy.android.colorpicker:compose-color-picker:0.7.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -49,7 +49,7 @@ fun PageWithStyles.toEntity(bookId: Long) = PageEntity(
 
 fun StyleRange.toEntity(pageId: Long) = StyleEntity(
     id = 0,
-    end = textRange.end,
+    finish = textRange.end,
     start = textRange.start,
     pageId = pageId,
     style = String.format("#%08X", spanStyle.background.toArgb()),
@@ -70,12 +70,13 @@ fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
     lastPage = lastPage
 )
 fun PageEntity.toDomain(styles: List<StyleRange>) = PageWithStyles(
+    id = id,
     number = number,
     text = text,
     styles = styles
 )
 fun StyleEntity.toDomain() = StyleRange(
-    textRange = TextRange(start, end),
+    textRange = TextRange(start, finish),
     spanStyle = SpanStyle(background = Color(style.toColorInt())),
     link = link
 )
@@ -149,12 +150,12 @@ class BARepositoryImpl(
         database.bookDao().updateBook(book.toEntity())
     }
 
-    override fun updatePage(bookId: Long, page: PageWithStyles): Flow<Unit> = flow {
-        page.styles.forEach{style ->
-            val st = style.toEntity(
-                database.pageDao().getPageByBookNum(bookId, page.number).id)
-            database.styleDao().addStyle(st)
+    override fun updatePage(pageId: Long, added: List<StyleRange>, deleted: List<StyleRange>): Flow<Unit> = flow {
+        database.withTransaction {
+            database.styleDao().addStyles(added.map { it.toEntity(pageId) })
+            database.styleDao().deleteStyles(deleted.map { Pair(it.textRange.start, it.textRange.end) })
         }
+        emit(Unit)
     }
 
     override fun getBookIdsByUser(userId: Long): Flow<List<Long>> {

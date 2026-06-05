@@ -20,7 +20,7 @@ data class StyleEntity (
     @PrimaryKey(autoGenerate = true) val id: Long,
     val pageId: Long,
     val start: Int,
-    val end: Int,
+    val finish: Int,
     val style: String,
     val link: String?
 )
