@@ -1,6 +1,7 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,6 +75,10 @@ fun BAPageScreen(
     onDeleteNote: (Long) -> Unit,
     onChangeColor: (Color) -> Unit
 ){
+    BackHandler(enabled = true){
+        if (page.number > 1)
+            onMove(page.number - 1)
+    }
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.StartToEnd && page.number > 1){
@@ -94,7 +99,6 @@ fun BAPageScreen(
     var colorChosen by remember { mutableStateOf(curColor) }
     var noteText by remember { mutableStateOf("") }
     val styleRanges by remember { mutableStateOf(page.styles.toMutableList()) }
-    val sliderPosition by remember { mutableFloatStateOf(page.number.toFloat()) }
     var value by remember {mutableStateOf(TextFieldValue(page.text))}
     value = addSticker(value, page.styles.toMutableList(), null, null)
 
@@ -112,7 +116,7 @@ fun BAPageScreen(
             bottomBar = {
                 Column {
                     Slider(
-                        value = sliderPosition,
+                        value = page.number.toFloat(),
                         onValueChange = { onMove(it.toInt()) },
                         valueRange = 1f..nPages.toFloat(),
                         steps = nPages - 1
@@ -122,24 +126,24 @@ fun BAPageScreen(
                         Arrangement.Start,
                         Alignment.CenterVertically
                     ) {
-                        Button({ onHome() }) {
+                        Button({ onHome() }, modifier = Modifier.weight(0.3f)) {
                             Icon(
                                 Icons.Default.Home,
                                 "На главную"
                             )
                         }
-                        Button({showColorChoicer = true}) {
-                            Icon(
-                                Icons.Default.Palette,
-                                "Выбрать цвет"
-                            )
-                        }
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.weight(0.7f),
                             Arrangement.Center,
                             Alignment.CenterVertically
                         ){
                             Text(page.number.toString())
+                        }
+                        Button({showColorChoicer = true}, modifier = Modifier.weight(0.3f)) {
+                            Icon(
+                                Icons.Default.Palette,
+                                "Выбрать цвет"
+                            )
                         }
                     }
                 }
@@ -309,6 +313,11 @@ fun BAPageScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
                         .appendTextContextMenuComponents {
+                            separator()
+                            item(key = "ShowColor", label = "Изменить цвет") {
+                                showColorChoicer = true
+                                close()
+                            }
                             if (value.selection.end != value.selection.start) {
                                 separator()
                                 item(key = "AddSticker", label = "Добавить стикер") {
@@ -391,9 +400,10 @@ fun addSticker(value: TextFieldValue,
         )
         styleRanges.add(newStyleRange)
     }
+    val sortedRanges = styleRanges.sortedBy { it.link != null }
     val newString = buildAnnotatedString {
         append(value.text)
-        styleRanges.forEach { styleRange ->
+        sortedRanges.forEach { styleRange ->
             addStyle(
                 styleRange.spanStyle.copy(
                     textDecoration = if (styleRange.link != null) TextDecoration.Underline

@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class BookEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val name: String,
+    val author: String,
     val lastPage: Int
 )

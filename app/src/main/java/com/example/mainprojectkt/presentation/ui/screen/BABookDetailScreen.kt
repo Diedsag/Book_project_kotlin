@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.viewmodel.BookUiState
@@ -55,6 +56,7 @@ fun BABookDetailScreen(
             Text(
                 book.name ?: "Название не указано",
                 fontSize = 50.sp,
+                lineHeight = 1.2.em,
                 modifier = Modifier.padding(bottom = 30.dp)
             )
             LazyColumn {
@@ -68,7 +70,7 @@ fun BABookDetailScreen(
                             .padding(vertical = 6.dp, horizontal = 12.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(0.8f)
+                            modifier = Modifier.fillMaxWidth()
                                 .clickable { onMove(item.number) }) {
                             Text(
                                 item.number.toString(),

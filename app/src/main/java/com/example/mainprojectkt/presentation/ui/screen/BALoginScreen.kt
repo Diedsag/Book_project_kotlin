@@ -93,6 +93,9 @@ fun BALoginScreen(
                                 "Email" -> {
                                     errorMessage = "Почта не найдена."
                                 }
+                                "Second" ->{
+                                    errorMessage = "Вы уже в данном аккаунте."
+                                }
                                 else -> {
                                     onBack()
                                 }

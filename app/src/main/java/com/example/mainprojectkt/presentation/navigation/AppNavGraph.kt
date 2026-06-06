@@ -101,7 +101,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     }
                 },
                 {navController.navigate("home")},
-                curBookId,
+                viewModel::deleteBook,
             )
         }
         composable(

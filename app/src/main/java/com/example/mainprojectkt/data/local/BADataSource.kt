@@ -1,7 +1,9 @@
 package com.example.mainprojectkt.data.local
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import com.example.mainprojectkt.data.model.BookDto
 import com.example.mainprojectkt.data.model.ShiftSizes
@@ -14,19 +16,35 @@ import com.itextpdf.kernel.pdf.canvas.parser.listener.FilteredTextEventListener
 import com.itextpdf.kernel.pdf.canvas.parser.listener.LocationTextExtractionStrategy
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.io.File
 
 
 class BADataSource(
     private val context: Context,
     private val maxConcurrency: Int = Runtime.getRuntime().availableProcessors()
 ) {
+    fun getFileNameFromUri(uri: Uri, contentResolver: ContentResolver): String? {
+        return when (uri.scheme) {
+            "file" -> File(uri.path).name
+            "content" -> {
+                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (cursor.moveToFirst() && nameIndex != -1) {
+                        cursor.getString(nameIndex)
+                    } else null
+                }
+            }
+            else -> null
+        }
+    }
     suspend fun getBookInfo(uri: Uri): BookDto = withContext(Dispatchers.IO) {
         context.contentResolver.openInputStream(uri)?.use { stream ->
             PdfReader(stream).use { reader ->
                 PdfDocument(reader).use { pdfDoc ->
                     val info = pdfDoc.documentInfo
+                    val fileName = getFileNameFromUri(uri, context.contentResolver)
                     BookDto(
-                        title = info.title,
+                        title = info.title ?: fileName?.removeSuffix(".pdf"),
                         author = info.getMoreInfo("Author")
                     )
                 }

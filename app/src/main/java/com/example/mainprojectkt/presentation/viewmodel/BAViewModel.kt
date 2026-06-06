@@ -14,6 +14,7 @@ import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.usecase.AddNoteUseCase
 import com.example.mainprojectkt.domain.usecase.AddUserUseCase
+import com.example.mainprojectkt.domain.usecase.DeleteBookUseCase
 import com.example.mainprojectkt.domain.usecase.DeleteNoteUseCase
 import com.example.mainprojectkt.domain.usecase.DownloadBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetNotesUseCase
@@ -48,7 +49,8 @@ class BAViewModel (
     val getNotesUseCase: GetNotesUseCase,
     val deleteNoteUseCase: DeleteNoteUseCase,
     val addUserUseCase: AddUserUseCase,
-    val getUserUseCase: GetUserUseCase
+    val getUserUseCase: GetUserUseCase,
+    val deleteBookUseCase: DeleteBookUseCase
 ) : ViewModel(
 ) {
     val tempIdCounter = AtomicLong(0L)
@@ -186,6 +188,10 @@ class BAViewModel (
                 onResult("Email")
                 return@launch
             }
+            if (foundUser.id == userId.value){
+                onResult("Second")
+                return@launch
+            }
             if (!BCrypt.checkpw(password, foundUser.hashedPassword)){
                 onResult("Password")
                 return@launch
@@ -202,5 +208,14 @@ class BAViewModel (
 
     fun changeColor(color: Color){
         colorState.value = color
+    }
+
+    fun deleteBook(book: Book){
+        val found = booksUiState.value.find { (it is BookUiState.Success && it.book == book) }
+        found?.let { booksUiState.value -= it
+            viewModelScope.launch {
+                deleteBookUseCase(book).collect {}
+            }
+        }
     }
 }

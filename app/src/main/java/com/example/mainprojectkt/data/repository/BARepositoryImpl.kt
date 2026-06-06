@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 fun Book.toEntity() = BookEntity(
     id = id,
     name = name ?: "Название не указано",
+    author = author,
     lastPage = lastPage
 )
 
@@ -72,6 +73,7 @@ fun Note.toEntity() = NoteEntity(
 fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
     id = id,
     name = name,
+    author = author,
     pages = pages,
     lastPage = lastPage
 )
@@ -111,7 +113,8 @@ class BARepositoryImpl(
         database.withTransaction {
             val book = Book(
                 id = 0,
-                name = info.title,
+                name = info.title ?: "Название не считано",
+                author = info.author ?: "Автор не считан",
                 pages = emptyList(),
                 lastPage = 1
             )
@@ -198,4 +201,9 @@ class BARepositoryImpl(
     override fun getUser(email: String): Flow<User?> {
         return database.userDao().getUserByEmail(email).map{it?.toDomain()}
     }
+
+    override fun deleteBook(book: Book) = flow{
+        database.bookDao().deleteBook(book.toEntity())
+        emit(Unit)
+    }.flowOn(Dispatchers.IO)
 }
