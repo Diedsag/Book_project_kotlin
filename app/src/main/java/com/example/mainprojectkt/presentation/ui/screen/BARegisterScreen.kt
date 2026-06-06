@@ -115,8 +115,9 @@ fun BARegisterScreen(
                 modifier = Modifier.fillMaxWidth()
             ){
                 Button({
-                    if (password.length < 8)
-                        errorMessage = "Длина пароля меньше 8 символов."
+                    if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
+                        errorMessage = "Не все данные введены."
+                    }
                     else if (password != repeatPassword) {
                         errorMessage = "Пароли не совпадают."
                     }
@@ -129,8 +130,8 @@ fun BARegisterScreen(
                     else if(!Regex("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)){
                         errorMessage = "Пароль не содержит специальных символов."
                     }
-                    else if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
-                        errorMessage = "Не все данные введены."
+                    else if (password.length < 8) {
+                        errorMessage = "Длина пароля меньше 8 символов."
                     }
                     else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                     {
