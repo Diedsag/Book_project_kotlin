@@ -2,6 +2,7 @@ package com.example.mainprojectkt.presentation.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
 import java.util.concurrent.atomic.AtomicLong
@@ -49,10 +51,11 @@ class BAViewModel (
     val getUserUseCase: GetUserUseCase
 ) : ViewModel(
 ) {
-    var lastId = AtomicLong(0)
+    val tempIdCounter = AtomicLong(0L)
     var userId: MutableStateFlow<Long> = MutableStateFlow(-1L)
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     var notesState: MutableStateFlow<List<Note>> = MutableStateFlow(listOf())
+    var colorState: MutableStateFlow<Color> = MutableStateFlow(Color.Green)
     var curBookId = MutableStateFlow<Long?>(null)
     private val dataStore = (context.applicationContext as BookApplication).dataStore
     init{
@@ -96,12 +99,17 @@ class BAViewModel (
         }
     }
     fun scanBook(uri: Uri?) {
-        if(userId.value.toInt() != -1) {
-            uri?.let { uri ->
-                val newId = lastId.incrementAndGet()
-                booksUiState.value += BookUiState.Loading(newId)
-                viewModelScope.launch(Dispatchers.IO) {
-                    scanBookUseCase(uri, userId.value)
+        if (userId.value == -1L) return
+        uri?.let { uri ->
+            val newId = tempIdCounter.decrementAndGet()
+            booksUiState.value += BookUiState.Loading(newId)
+            viewModelScope.launch(Dispatchers.IO) {
+                val savedId = scanBookUseCase(uri, userId.value)
+                booksUiState.value = booksUiState.value.map { state ->
+                    if (state is BookUiState.Loading && state.id == newId) {
+                        BookUiState.Loading(savedId)
+                    }
+                    else state
                 }
             }
         }
@@ -190,5 +198,9 @@ class BAViewModel (
             booksUiState.value = listOf()
             onResult("")
         }
+    }
+
+    fun changeColor(color: Color){
+        colorState.value = color
     }
 }

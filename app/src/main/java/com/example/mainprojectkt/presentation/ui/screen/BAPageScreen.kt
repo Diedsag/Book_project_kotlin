@@ -1,25 +1,29 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.contextmenu.builder.item
 import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -32,37 +36,43 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
+import com.example.mainprojectkt.presentation.ui.component.ColorChoicer
+import com.example.mainprojectkt.presentation.viewmodel.BookUiState
+
 @Composable
 fun BAPageScreen(
     nPages: Int,
     page: PageWithStyles,
+    curColor: Color,
+    notes: List<Note>,
     onMove: (Int) -> Unit,
     onChangeStyle: (PageWithStyles) -> Unit,
     onAddNote: (Long, String, (Long) -> Unit) -> Unit,
-    onBack: () -> Unit,
-    onDeleteNote: (Long) -> Unit
+    onHome: () -> Unit,
+    onDeleteNote: (Long) -> Unit,
+    onChangeColor: (Color) -> Unit
 ){
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
@@ -79,12 +89,14 @@ fun BAPageScreen(
             }
         }
     )
-    var showNoteRedactor by remember { mutableStateOf(false) }
+    var showNoteState by remember { mutableIntStateOf(0) }
+    var showColorChoicer by remember { mutableStateOf(false) }
+    var colorChosen by remember { mutableStateOf(curColor) }
     var noteText by remember { mutableStateOf("") }
     val styleRanges by remember { mutableStateOf(page.styles.toMutableList()) }
     val sliderPosition by remember { mutableFloatStateOf(page.number.toFloat()) }
     var value by remember {mutableStateOf(TextFieldValue(page.text))}
-    value = changeValue(value, page.styles.toMutableList(), null, null)
+    value = addSticker(value, page.styles.toMutableList(), null, null)
 
     val textStyle = TextStyle(
         fontSize = 16.sp,
@@ -98,7 +110,7 @@ fun BAPageScreen(
     ) {
         Scaffold(
             bottomBar = {
-                Column() {
+                Column {
                     Slider(
                         value = sliderPosition,
                         onValueChange = { onMove(it.toInt()) },
@@ -110,10 +122,16 @@ fun BAPageScreen(
                         Arrangement.Start,
                         Alignment.CenterVertically
                     ) {
-                        Button({ onBack() }) {
+                        Button({ onHome() }) {
                             Icon(
                                 Icons.Default.Home,
                                 "На главную"
+                            )
+                        }
+                        Button({showColorChoicer = true}) {
+                            Icon(
+                                Icons.Default.Palette,
+                                "Выбрать цвет"
                             )
                         }
                         Row(
@@ -128,9 +146,9 @@ fun BAPageScreen(
             }
         ) {paddingValues ->
             Box(modifier = Modifier.wrapContentSize().padding(paddingValues).verticalScroll(rememberScrollState())) {
-                if (showNoteRedactor) {
+                if (showNoteState == 1) {
                     AlertDialog(
-                        onDismissRequest = { showNoteRedactor = false },
+                        onDismissRequest = { showNoteState = 0 },
                         title = { Text("Заметка") },
                         text = {
                             Column {
@@ -148,10 +166,10 @@ fun BAPageScreen(
                             Button(
                                 onClick = {
                                     onAddNote(page.id, noteText){
-                                        id -> value = changeValue(value, styleRanges,
-                                        Color.Green, "myapp://note/$id")
+                                        id -> value = addSticker(value, styleRanges, curColor, "myapp://note/$id")
                                         onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
-                                        showNoteRedactor = false
+                                        noteText = ""
+                                        showNoteState = 0
                                     }
                                 }
                             ) {
@@ -162,7 +180,115 @@ fun BAPageScreen(
                             TextButton(
                                 onClick = {
                                     noteText = ""
-                                    showNoteRedactor = false
+                                    showNoteState = 0
+                                }
+                            ) {
+                                Text("Отмена")
+                            }
+                        },
+                        properties = DialogProperties(
+                            dismissOnBackPress = true,
+                            dismissOnClickOutside = true
+                        )
+                    )
+                }
+
+                if (showNoteState == 2) {
+                    AlertDialog(
+                        onDismissRequest = { showNoteState = 0 },
+                        title = { Text("Заметки") },
+                        text = {
+                            /*LazyColumn {
+                                items(
+                                    notes,
+                                    key = {it.id}
+                                ) { note ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 6.dp, horizontal = 12.dp)
+                                    ) {
+                                        Row(modifier = Modifier.fillMaxWidth()) {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(0.8f)
+                                                    .clickable { onSelect(item.book.id) }) {
+                                                Text(
+                                                    note.pageId,
+                                                    fontSize = 30.sp
+                                                )
+                                                Text(
+                                                    "Страниц: " + item.book.pages.size.toString(),
+                                                    fontSize = 15.sp
+                                                )
+                                            }
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(0.5f).align(Alignment.CenterVertically)
+                                                    .clickable { onResume(item.book.id) },) {
+                                                Icon(
+                                                    Icons.Default.PlayArrow,
+                                                    "Возобновить чтение"
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }*/
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    onAddNote(page.id, noteText){id ->
+                                        value = addSticker(value, styleRanges, curColor, "myapp://note/$id")
+                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
+                                        showNoteState = 0
+                                    }
+                                }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    noteText = ""
+                                    showNoteState = 0
+                                }
+                            ) {
+                                Text("Отмена")
+                            }
+                        },
+                        properties = DialogProperties(
+                            dismissOnBackPress = true,
+                            dismissOnClickOutside = true
+                        )
+                    )
+                }
+
+                if (showColorChoicer) {
+                    AlertDialog(
+                        onDismissRequest = { showColorChoicer = false },
+                        title = { Text("Цвет") },
+                        text = {
+                            Column {
+                                ColorChoicer(curColor){
+                                    colorChosen = it
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    onChangeColor(colorChosen)
+                                    showColorChoicer = false
+                                }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    showColorChoicer = false
                                 }
                             ) {
                                 Text("Отмена")
@@ -183,27 +309,58 @@ fun BAPageScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
                         .appendTextContextMenuComponents {
-                            separator()
-                            item(key = "Add", label = "Добавить стикер") {
-                                value = changeValue(value, styleRanges, Color.Blue, null)
-                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
-                                close()
-                            }
-                            separator()
-                            item(key = "Delete", label = "Убрать стикер") {
-                                value = cutSticker(value, styleRanges)
-                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
-                                close()
-                            }
-                            separator()
-                            item(key = "Note", label = "Добавить заметку") {
-                                showNoteRedactor = true
-                                close()
-                            }
-                            item(key = "Note", label = "Убрать заметку") {
-                                deleteNote(value, styleRanges){id -> onDeleteNote(id)}
-                                onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
-                                close()
+                            if (value.selection.end != value.selection.start) {
+                                separator()
+                                item(key = "AddSticker", label = "Добавить стикер") {
+                                    if (curColor != Color.Transparent) {
+                                        value = addSticker(value, styleRanges, curColor, null)
+                                        onChangeStyle(
+                                            PageWithStyles(
+                                                page.id,
+                                                page.number,
+                                                value.text,
+                                                styleRanges
+                                            )
+                                        )
+                                    }
+                                    close()
+                                }
+                                separator()
+                                item(key = "DeleteSticker", label = "Убрать стикер") {
+                                    value = cutSticker(value, styleRanges)
+                                    onChangeStyle(
+                                        PageWithStyles(
+                                            page.id,
+                                            page.number,
+                                            value.text,
+                                            styleRanges
+                                        )
+                                    )
+                                    close()
+                                }
+                                separator()
+                                item(key = "AddNote", label = "Добавить заметку") {
+                                    showNoteState = 1
+                                    close()
+                                }
+                                separator()
+                                item(key = "ChooseNote", label = "Выбрать заметку") {
+                                    showNoteState = 2
+                                    close()
+                                }
+                                separator()
+                                item(key = "DeleteNote", label = "Убрать заметку") {
+                                    deleteNote(value, styleRanges) { id -> onDeleteNote(id) }
+                                    onChangeStyle(
+                                        PageWithStyles(
+                                            page.id,
+                                            page.number,
+                                            value.text,
+                                            styleRanges
+                                        )
+                                    )
+                                    close()
+                                }
                             }
                         }
                 )
@@ -220,7 +377,7 @@ fun BAPageScreen(
     }
 }
 
-fun changeValue(value: TextFieldValue,
+fun addSticker(value: TextFieldValue,
                 styleRanges: MutableList<StyleRange>,
                 color: Color?,
                 link: String?): TextFieldValue{
@@ -238,7 +395,9 @@ fun changeValue(value: TextFieldValue,
         append(value.text)
         styleRanges.forEach { styleRange ->
             addStyle(
-                styleRange.spanStyle,
+                styleRange.spanStyle.copy(
+                    textDecoration = if (styleRange.link != null) TextDecoration.Underline
+                    else TextDecoration.None),
                 styleRange.textRange.start,
                 styleRange.textRange.end
             )
@@ -280,7 +439,9 @@ fun cutSticker(value: TextFieldValue,
         append(value.text)
         styleRanges.forEach { styleRange ->
             addStyle(
-                styleRange.spanStyle,
+                styleRange.spanStyle.copy(
+                    textDecoration = if (styleRange.link != null) TextDecoration.Underline
+                    else TextDecoration.None),
                 styleRange.textRange.start,
                 styleRange.textRange.end
             )
@@ -316,7 +477,9 @@ fun deleteNote(value: TextFieldValue,
         append(value.text)
         styleRanges.forEach { styleRange ->
             addStyle(
-                styleRange.spanStyle,
+                styleRange.spanStyle.copy(
+                    textDecoration = if (styleRange.link != null) TextDecoration.Underline
+                    else TextDecoration.None),
                 styleRange.textRange.start,
                 styleRange.textRange.end
             )

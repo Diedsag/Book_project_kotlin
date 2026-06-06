@@ -41,9 +41,6 @@ fun BAMainScreen(
     toLogin: () -> Unit,
     isLogin: Boolean
 ){
-    var showColorChoicer by remember { mutableStateOf(false) }
-    var colorState by remember { mutableStateOf(Color.Green) }
-    var colorChosen by remember { mutableIntStateOf(0) }
     Column() {
         if (isLogin) {
             Button(onClick = toPdf) {
@@ -59,51 +56,5 @@ fun BAMainScreen(
         Button(onClick = toLogin) {
             Text("Войти")
         }
-        Button(onClick = { showColorChoicer = true }) {
-            Text("Выбрать цвет")
-        }
-        Box(modifier = Modifier
-            .wrapContentSize()
-            .verticalScroll(rememberScrollState())) {
-            if (showColorChoicer) {
-                AlertDialog(
-                    onDismissRequest = { showColorChoicer = false },
-                    title = { Text("Цвет") },
-                    text = {
-                        Column {
-                            ColorChoicer(colorState){
-                                Log.d("TAG", it.toString())
-                                colorChosen = it
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                colorState = Color(colorChosen)
-                                showColorChoicer = false
-                            }
-                        ) {
-                            Text("OK")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                showColorChoicer = false
-                            }
-                        ) {
-                            Text("Отмена")
-                        }
-                    },
-                    properties = DialogProperties(
-                        dismissOnBackPress = true,
-                        dismissOnClickOutside = true
-                    )
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.background(colorState).width(50.dp).height(50.dp))
     }
 }

@@ -2,8 +2,10 @@ package com.example.mainprojectkt.presentation.ui.screen
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -17,17 +19,25 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun BANoteScreen(
     text: String,
+    onHome: () -> Unit,
     onBack: () -> Unit
 ){
-    Log.d("TAG", "Note")
     Scaffold(
         bottomBar = {
-            Column() {
-                Button({onBack()}) {
-                    Icon(
-                        Icons.Default.Home,
-                        "На главную"
-                    )
+            Column {
+                Row {
+                    Button({ onHome() }) {
+                        Icon(
+                            Icons.Default.Home,
+                            "На главную"
+                        )
+                    }
+                    Button({ onBack() }){
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            "Назад"
+                        )
+                    }
                 }
             }
         }

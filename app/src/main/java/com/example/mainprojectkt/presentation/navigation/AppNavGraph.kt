@@ -1,6 +1,7 @@
 package com.example.mainprojectkt.presentation.navigation
 
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val booksState by viewModel.booksUiState.collectAsStateWithLifecycle()
     val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
     val notesState by viewModel.notesState.collectAsStateWithLifecycle()
+    val colorState by viewModel.colorState.collectAsStateWithLifecycle()
     val userId by viewModel.userId.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
@@ -51,13 +53,16 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 BAPageScreen(
                     curBook.pages.size,
                     page,
+                    colorState,
+                    listOf(),
                     {num -> navController.navigate("page/${num}")
                         viewModel.changeLastNum(num)
                     },
                     viewModel::changePage,
                     viewModel::addNote,
                     {navController.navigate("home")},
-                    viewModel::deleteNote
+                    viewModel::deleteNote,
+                    viewModel::changeColor
                 )
             }
         }
@@ -70,9 +75,11 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
         ) {backStackEntry ->
             val id = backStackEntry.arguments?.getLong("id") ?: return@composable
             val note = notesState.find { it.id == id } ?: return@composable
+            val activity = LocalActivity.current
             BANoteScreen(
                 note.text,
                 {navController.navigate("home")},
+                {activity?.finish()}
             )
         }
         composable("pdf") {

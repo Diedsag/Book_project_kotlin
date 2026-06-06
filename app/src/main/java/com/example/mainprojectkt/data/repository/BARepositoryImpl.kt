@@ -83,7 +83,7 @@ fun PageEntity.toDomain(styles: List<StyleRange>) = PageWithStyles(
 )
 fun StyleEntity.toDomain() = StyleRange(
     textRange = TextRange(start, finish),
-    spanStyle = SpanStyle(background = Color(style.toColorInt())),
+    spanStyle = SpanStyle(background = Color(style.removePrefix("#").toLong(16).toInt())),
     link = link
 )
 
@@ -100,19 +100,14 @@ fun NoteEntity.toDomain() = Note(
     text = text
 )
 
-/*fun PageDto.toEntity(bookId: Long) = PageEntity(
-    id = 0,
-    bookId = bookId,
-    number = pageNumber,
-    text = text
-)*/
 class BARepositoryImpl(
     val dataSource: BADataSource,
     val database: BADatabase
 ): BARepository{
-    override suspend fun scanBook(uri: Uri, userId: Long) {
+    override suspend fun scanBook(uri: Uri, userId: Long): Long {
         val info = dataSource.getBookInfo(uri)
         val pages = dataSource.getPages(uri)
+        var bookId = 0L
         database.withTransaction {
             val book = Book(
                 id = 0,
@@ -120,7 +115,7 @@ class BARepositoryImpl(
                 pages = emptyList(),
                 lastPage = 1
             )
-            val bookId = database.bookDao().addBook(book.toEntity())
+            bookId = database.bookDao().addBook(book.toEntity())
 
             database.userBookDao().addUserBook(UserBookEntity(0, userId, bookId))
 
@@ -129,6 +124,7 @@ class BARepositoryImpl(
             }.sortedBy { it.number }
             database.pageDao().addPages(pageEntities)
         }
+        return bookId
     }
 
     override fun uploadBook(book: Book): Flow<Unit> {

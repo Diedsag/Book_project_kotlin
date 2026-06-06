@@ -10,7 +10,7 @@ import com.example.mainprojectkt.domain.model.StyleRange
 import kotlinx.coroutines.flow.Flow
 
 interface BARepository {
-    suspend fun scanBook(uri: Uri, userId: Long)
+    suspend fun scanBook(uri: Uri, userId: Long): Long
     fun uploadBook(book: Book): Flow<Unit>
     fun downloadBooks(userId: Long): Flow<List<Book>>
     suspend fun getBookWithPages(bookId: Long): BookWithPages?

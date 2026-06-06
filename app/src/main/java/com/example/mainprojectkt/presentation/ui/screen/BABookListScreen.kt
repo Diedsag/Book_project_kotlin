@@ -57,13 +57,7 @@ fun BABookListScreen(
             else{
                 LazyColumn {
                     items(
-                        books,
-                        key = {state ->
-                            when (state) {
-                                is BookUiState.Loading -> state.id
-                                is BookUiState.Success -> state.book.id
-                            }
-                        }
+                        books
                     ) { item ->
                         when(item){
                             is BookUiState.Loading -> {
