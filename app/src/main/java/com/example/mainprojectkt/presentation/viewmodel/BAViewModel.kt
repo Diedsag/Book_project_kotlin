@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
 import java.util.concurrent.atomic.AtomicLong
@@ -69,6 +68,15 @@ class BAViewModel (
         }
 
         viewModelScope.launch {
+            userId.flatMapLatest { id ->
+                if (id == -1L) flowOf(emptyList())
+                else getNotesUseCase(id)
+            }.collect {
+                notesState.value = it
+            }
+        }
+
+        viewModelScope.launch {
             dataStore.data.collect { account ->
                 userId.value = account[PreferencesKeys.USER_ID] ?: -1
             }
@@ -98,12 +106,6 @@ class BAViewModel (
                         booksUiState.value += BookUiState.Loading(id)
                     }
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            getNotesUseCase().collect{
-                notesState.value = it
             }
         }
     }
@@ -162,6 +164,15 @@ class BAViewModel (
                 onResult(noteId)
             }
         }
+    }
+
+    fun getBookNotes(): List<Note> {
+        val curBook = booksUiState.value.find {
+            it is BookUiState.Success && it.book.id == curBookId.value
+        }
+        if (curBook !is BookUiState.Success) return emptyList()
+        val pageIds = curBook.book.pages.map { it.id }.toSet()
+        return notesState.value.filter { it.pageId in pageIds }
     }
 
     fun deleteNote(id: Long) {

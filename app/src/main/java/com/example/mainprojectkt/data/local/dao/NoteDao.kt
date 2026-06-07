@@ -12,7 +12,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteDao {
     @Insert (onConflict = OnConflictStrategy.IGNORE) suspend fun addNote(note: NoteEntity): Long
-    @Query ("select * from Notes") fun getNotes(): Flow<List<NoteEntity>>
+    @Query("""
+        SELECT * FROM Notes note
+        INNER JOIN Pages page ON note.pageId = page.id
+        INNER JOIN UserBooks userBook ON page.bookId = userBook.bookId
+        WHERE userBook.userId = :userId
+    """)
+    fun getNotes(userId: Long): Flow<List<NoteEntity>>
     @Query("delete from Notes where id = :id")
     suspend fun deleteNote(id: Long)
 }

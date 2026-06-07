@@ -197,8 +197,8 @@ class BARepositoryImpl(
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun getNotes(): Flow<List<Note>> {
-        return database.noteDao().getNotes().map {notes ->
+    override fun getNotes(userId: Long): Flow<List<Note>> {
+        return database.noteDao().getNotes(userId).map {notes ->
             notes.map { it.toDomain() }
         }.flowOn(Dispatchers.IO)
     }

@@ -5,6 +5,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
@@ -31,6 +32,9 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val notesState by viewModel.notesState.collectAsStateWithLifecycle()
     val colorState by viewModel.colorState.collectAsStateWithLifecycle()
     val user by viewModel.userState.collectAsStateWithLifecycle()
+    val bookNotesState = remember(curBookId, booksState, notesState) {
+        viewModel.getBookNotes()
+    }
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
@@ -54,7 +58,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     curBook.pages.size,
                     page,
                     colorState,
-                    listOf(),
+                    notesState,
+                    bookNotesState,
                     {num -> navController.navigate("page/${num}")
                         viewModel.changeLastNum(num)
                     },

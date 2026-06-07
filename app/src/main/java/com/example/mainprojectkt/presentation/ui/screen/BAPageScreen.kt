@@ -51,6 +51,7 @@ import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 import com.example.mainprojectkt.presentation.ui.component.ColorChoicer
+import com.example.mainprojectkt.presentation.ui.component.NoteChoicer
 import com.example.mainprojectkt.presentation.ui.component.buildPage
 
 @Composable
@@ -58,7 +59,8 @@ fun BAPageScreen(
     nPages: Int,
     page: PageWithStyles,
     curColor: Color,
-    notes: List<Note>,
+    allNotes: List<Note>,
+    bookNotes: List<Note>,
     onMove: (Int) -> Unit,
     onChangeStyle: (PageWithStyles) -> Unit,
     onAddNote: (Long, String, (Long) -> Unit) -> Unit,
@@ -96,6 +98,15 @@ fun BAPageScreen(
     var showColorChoicer by remember { mutableStateOf(false) }
     var colorChosen by remember { mutableStateOf(curColor) }
     var noteText by remember { mutableStateOf("")}
+    var curFilter by remember { mutableIntStateOf(0) }
+    var noteChosen: Note? by remember { mutableStateOf(null) }
+
+    // Выбираем список заметок в зависимости от фильтра
+    val filteredNotes = when (curFilter) {
+        0 -> allNotes      // "Все"
+        1 -> bookNotes  // "Текущей книги"
+        else -> emptyList()
+    }
     var selection by remember(page.number) { mutableStateOf(TextRange(0, 0)) }
 
     val annotatedString = remember(page.id, page.text, page.styles.hashCode()) {
@@ -160,7 +171,9 @@ fun BAPageScreen(
                                 value = noteText,
                                 onValueChange = { noteText = it },
                                 label = { Text("Текст") },
-                                modifier = Modifier.fillMaxWidth().height(200.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
                                 maxLines = Int.MAX_VALUE,
                                 singleLine = false,
                             )
@@ -184,13 +197,38 @@ fun BAPageScreen(
                     AlertDialog(
                         onDismissRequest = { showNoteState = 0 },
                         title = { Text("Заметки") },
-                        text = { /* LazyColumn */ },
+                        text = {
+                            NoteChoicer(
+                                elements = filteredNotes,
+                                curFilter = curFilter,
+                                onFilterChange = { newFilter ->
+                                    curFilter = newFilter
+                                },
+                                sendNote = {note ->
+                                    noteChosen = note
+                                }
+                            )
+                        },
                         confirmButton = {
                             Button(onClick = {
-                                onAddNote(page.id, noteText){id ->
-                                    val newStyles = addSticker(page.styles, safeSelection, curColor, "myapp://note/$id")
-                                    onChangeStyle(PageWithStyles(page.id, page.number, page.text, newStyles, page.images))
-                                    showNoteState = 0
+                                showNoteState = 0
+                                noteChosen?.let {
+                                    val newStyles = addSticker(
+                                        page.styles,
+                                        safeSelection,
+                                        curColor,
+                                        "myapp://note/${it.id}"
+                                    )
+                                    onChangeStyle(
+                                        PageWithStyles(
+                                            page.id,
+                                            page.number,
+                                            page.text,
+                                            newStyles,
+                                            page.images
+                                        )
+                                    )
+                                    noteChosen = null
                                 }
                             }) { Text("OK") }
                         },
@@ -239,15 +277,32 @@ fun BAPageScreen(
                                 separator()
                                 item(key = "AddSticker", label = "Добавить стикер") {
                                     if (curColor != Color.Transparent) {
-                                        val newStyles = addSticker(page.styles, safeSelection, curColor, null)
-                                        onChangeStyle(PageWithStyles(page.id, page.number, page.text, newStyles, page.images))
+                                        val newStyles =
+                                            addSticker(page.styles, safeSelection, curColor, null)
+                                        onChangeStyle(
+                                            PageWithStyles(
+                                                page.id,
+                                                page.number,
+                                                page.text,
+                                                newStyles,
+                                                page.images
+                                            )
+                                        )
                                     }
                                     close()
                                 }
                                 separator()
                                 item(key = "DeleteSticker", label = "Убрать стикер") {
                                     val newStyles = cutSticker(page.styles, safeSelection)
-                                    onChangeStyle(PageWithStyles(page.id, page.number, page.text, newStyles, page.images))
+                                    onChangeStyle(
+                                        PageWithStyles(
+                                            page.id,
+                                            page.number,
+                                            page.text,
+                                            newStyles,
+                                            page.images
+                                        )
+                                    )
                                     close()
                                 }
                                 separator()
@@ -262,8 +317,18 @@ fun BAPageScreen(
                                 }
                                 separator()
                                 item(key = "DeleteNote", label = "Убрать заметку") {
-                                    val newStyles = deleteNote(page.styles, safeSelection) { id -> onDeleteNote(id) }
-                                    onChangeStyle(PageWithStyles(page.id, page.number, page.text, newStyles, page.images))
+                                    val newStyles = deleteNote(page.styles, safeSelection) { id ->
+                                        onDeleteNote(id)
+                                    }
+                                    onChangeStyle(
+                                        PageWithStyles(
+                                            page.id,
+                                            page.number,
+                                            page.text,
+                                            newStyles,
+                                            page.images
+                                        )
+                                    )
                                     close()
                                 }
                             }
