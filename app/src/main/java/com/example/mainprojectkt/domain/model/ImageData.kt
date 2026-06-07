@@ -1,10 +1,10 @@
 package com.example.mainprojectkt.domain.model
 
-data class Image (
+data class ImageData (
     val id: Long,
     val pageId: Long,
     val localPath: String,
-    val positionIndex: Int,
-    val width: Int,
-    val height: Int
+    val position: Int,
+    val width: Float,
+    val height: Float
 )

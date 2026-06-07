@@ -49,7 +49,8 @@ fun BABookListScreen(
     onSelect: (Long) -> Unit,
     onResume: (Long) -> Unit,
     onBack: () -> Unit,
-    onDelete: (Book) -> Unit
+    onDelete: (Book) -> Unit,
+    onAdd: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -69,7 +70,7 @@ fun BABookListScreen(
                     "Список книг",
                     fontSize = 50.sp
                 )
-                IconButton({}) {
+                IconButton({onAdd()}) {
                     Icon(
                         Icons.Default.Add,
                         "Добавить",

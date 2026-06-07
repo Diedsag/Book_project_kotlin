@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.screen.BABookDetailScreen
 import com.example.mainprojectkt.presentation.ui.screen.BABookListScreen
 import com.example.mainprojectkt.presentation.ui.screen.BALoginScreen
@@ -63,7 +62,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     viewModel::addNote,
                     {navController.navigate("home")},
                     viewModel::deleteNote,
-                    viewModel::changeColor
+                    viewModel::changeColor,
+                    {navController.popBackStack()}
                 )
             }
         }
@@ -86,7 +86,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
         composable("pdf") {
             BAPdfChoiceScreen(
                 viewModel::scanBook,
-                {navController.navigate("home")}
+                {navController.popBackStack()}
             )
         }
         composable("books") {
@@ -103,6 +103,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 },
                 {navController.navigate("home")},
                 viewModel::deleteBook,
+                {navController.navigate("pdf")}
             )
         }
         composable(

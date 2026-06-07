@@ -20,7 +20,7 @@ import com.example.mainprojectkt.data.local.entity.UserEntity
 import com.example.mainprojectkt.data.model.BookWithPages
 import com.example.mainprojectkt.data.model.User
 import com.example.mainprojectkt.domain.model.Book
-import com.example.mainprojectkt.domain.model.Image
+import com.example.mainprojectkt.domain.model.ImageData
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
@@ -79,7 +79,7 @@ fun BookEntity.toDomain(pages: List<PageWithStyles>) = Book(
     pages = pages,
     lastPage = lastPage
 )
-fun PageEntity.toDomain(styles: List<StyleRange>, images: List<Image>) = PageWithStyles(
+fun PageEntity.toDomain(styles: List<StyleRange>, images: List<ImageData>) = PageWithStyles(
     id = id,
     number = number,
     text = text,
@@ -105,13 +105,13 @@ fun NoteEntity.toDomain() = Note(
     text = text
 )
 
-fun ImageEntity.toDomain() = Image(
+fun ImageEntity.toDomain() = ImageData(
     id = id,
     localPath = imagePath,
     pageId = pageId,
-    positionIndex = position,
-    height = 0,
-    width = 0
+    position = position,
+    height = height,
+    width = width
 )
 
 class BARepositoryImpl(
