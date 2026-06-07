@@ -1,6 +1,8 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
 import android.util.Log
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
@@ -23,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -59,15 +64,23 @@ fun BABookListScreen(
         }
     ) {padding ->
         Column(modifier = Modifier.padding(padding)) {
-            Text(
-                "Список книг",
-                fontSize = 50.sp,
-                modifier = Modifier.padding(bottom = 30.dp)
-            )
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Список книг",
+                    fontSize = 50.sp
+                )
+                IconButton({}) {
+                    Icon(
+                        Icons.Default.Add,
+                        "Добавить",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
             if (books.isEmpty())
                 Text("У вас пока нет книг")
             else{
-                LazyColumn {
+                LazyColumn(modifier = Modifier.padding(top = 20.dp)) {
                     items(
                         books,
                         key = { state ->
@@ -86,6 +99,7 @@ fun BABookListScreen(
                             }
                             is BookUiState.Success -> {
                                 val dismissState = rememberSwipeToDismissBoxState(
+                                    positionalThreshold = { totalDistance -> totalDistance * 0.4f },
                                     confirmValueChange = { dismissValue ->
                                         if (dismissValue == SwipeToDismissBoxValue.StartToEnd || dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                             onDelete(item.book)

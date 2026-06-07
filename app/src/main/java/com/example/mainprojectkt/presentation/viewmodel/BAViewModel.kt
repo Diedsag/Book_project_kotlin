@@ -55,12 +55,19 @@ class BAViewModel (
 ) {
     val tempIdCounter = AtomicLong(0L)
     var userId: MutableStateFlow<Long> = MutableStateFlow(-1L)
+    var userState: MutableStateFlow<User?> = MutableStateFlow(null)
     var booksUiState: MutableStateFlow<List<BookUiState>> = MutableStateFlow(listOf())
     var notesState: MutableStateFlow<List<Note>> = MutableStateFlow(listOf())
     var colorState: MutableStateFlow<Color> = MutableStateFlow(Color.Green)
     var curBookId = MutableStateFlow<Long?>(null)
     private val dataStore = (context.applicationContext as BookApplication).dataStore
     init{
+        viewModelScope.launch {
+            userId.flatMapLatest { id ->
+                getUserUseCase(id)
+            }.collect { userState.value = it }
+        }
+
         viewModelScope.launch {
             dataStore.data.collect { account ->
                 userId.value = account[PreferencesKeys.USER_ID] ?: -1
@@ -217,5 +224,14 @@ class BAViewModel (
                 deleteBookUseCase(book).collect {}
             }
         }
+    }
+
+    fun logout(){
+        viewModelScope.launch {
+            dataStore.edit { account ->
+                account[PreferencesKeys.USER_ID] = -1L
+            }
+        }
+        booksUiState.value = listOf()
     }
 }

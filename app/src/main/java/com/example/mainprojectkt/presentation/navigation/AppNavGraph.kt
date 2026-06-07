@@ -31,7 +31,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val curBookId by viewModel.curBookId.collectAsStateWithLifecycle()
     val notesState by viewModel.notesState.collectAsStateWithLifecycle()
     val colorState by viewModel.colorState.collectAsStateWithLifecycle()
-    val userId by viewModel.userId.collectAsStateWithLifecycle()
+    val user by viewModel.userState.collectAsStateWithLifecycle()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
@@ -39,7 +39,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 {navController.navigate("books")},
                 {navController.navigate("register")},
                 {navController.navigate("login")},
-                userId != -1L
+                viewModel::logout,
+                user
             )
         }
         composable(

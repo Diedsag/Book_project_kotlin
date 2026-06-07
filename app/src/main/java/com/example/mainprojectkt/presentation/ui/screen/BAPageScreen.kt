@@ -100,6 +100,7 @@ fun BAPageScreen(
     var noteText by remember { mutableStateOf("") }
     val styleRanges by remember { mutableStateOf(page.styles.toMutableList()) }
     var value by remember {mutableStateOf(TextFieldValue(page.text))}
+    val images = page.images
     value = addSticker(value, page.styles.toMutableList(), null, null)
 
     val textStyle = TextStyle(
@@ -171,7 +172,7 @@ fun BAPageScreen(
                                 onClick = {
                                     onAddNote(page.id, noteText){
                                         id -> value = addSticker(value, styleRanges, curColor, "myapp://note/$id")
-                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
+                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges, images))
                                         noteText = ""
                                         showNoteState = 0
                                     }
@@ -243,7 +244,7 @@ fun BAPageScreen(
                                 onClick = {
                                     onAddNote(page.id, noteText){id ->
                                         value = addSticker(value, styleRanges, curColor, "myapp://note/$id")
-                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges))
+                                        onChangeStyle(PageWithStyles(page.id, page.number, value.text, styleRanges, images))
                                         showNoteState = 0
                                     }
                                 }
@@ -328,7 +329,8 @@ fun BAPageScreen(
                                                 page.id,
                                                 page.number,
                                                 value.text,
-                                                styleRanges
+                                                styleRanges,
+                                                images
                                             )
                                         )
                                     }
@@ -342,7 +344,8 @@ fun BAPageScreen(
                                             page.id,
                                             page.number,
                                             value.text,
-                                            styleRanges
+                                            styleRanges,
+                                            images
                                         )
                                     )
                                     close()
@@ -365,7 +368,8 @@ fun BAPageScreen(
                                             page.id,
                                             page.number,
                                             value.text,
-                                            styleRanges
+                                            styleRanges,
+                                            images
                                         )
                                     )
                                     close()
