@@ -24,8 +24,8 @@ import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
+import com.example.mainprojectkt.domain.usecase.UpdateNoteUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
-import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.AppTheme
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
@@ -43,7 +43,6 @@ class MainActivity : ComponentActivity() {
         )
 
         val scanBookUseCase = ScanBookUseCase(repository)
-        val uploadBookUseCase = UploadBookUseCase(repository)
         val downloadBooksUseCase = DownloadBooksUseCase(repository)
         val updateBookUseCase = UpdateBookUseCase(repository)
         val updatePageUseCase = UpdatePageUseCase(repository)
@@ -54,11 +53,11 @@ class MainActivity : ComponentActivity() {
         val addUserUseCase = AddUserUseCase(repository)
         val getUserUseCase = GetUserUseCase(repository)
         val deleteBookUseCase = DeleteBookUseCase(repository)
+        val updateNoteUseCase = UpdateNoteUseCase(repository)
 
         val viewModel = BAViewModel(
             applicationContext,
             scanBookUseCase,
-            uploadBookUseCase,
             downloadBooksUseCase,
             updateBookUseCase,
             updatePageUseCase,
@@ -68,7 +67,8 @@ class MainActivity : ComponentActivity() {
             deleteNoteUseCase,
             addUserUseCase,
             getUserUseCase,
-            deleteBookUseCase
+            deleteBookUseCase,
+            updateNoteUseCase
         )
         setContent {
             navController = rememberNavController()

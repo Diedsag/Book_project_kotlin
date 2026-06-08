@@ -5,7 +5,6 @@ import com.example.mainprojectkt.data.model.BookWithPages
 import com.example.mainprojectkt.data.model.User
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.domain.model.Note
-import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 import kotlinx.coroutines.flow.Flow
 
@@ -24,4 +23,5 @@ interface BARepository {
     fun getUserByEmail(email: String): Flow<User?>
     fun getUser(id: Long): Flow<User?>
     fun deleteBook(book: Book): Flow<Unit>
+    fun updateNote(note: Note): Flow<Unit>
 }

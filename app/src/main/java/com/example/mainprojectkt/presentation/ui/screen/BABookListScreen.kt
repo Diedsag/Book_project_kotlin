@@ -17,25 +17,29 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.Book
+import com.example.mainprojectkt.presentation.ui.component.BookDialog
+import com.example.mainprojectkt.presentation.ui.component.SwipeToRevealCard
 import com.example.mainprojectkt.presentation.viewmodel.BookUiState
+
 
 @Composable
 fun BABookListScreen(
@@ -44,27 +48,35 @@ fun BABookListScreen(
     onResume: (Long) -> Unit,
     onBack: () -> Unit,
     onDelete: (Book) -> Unit,
+    onUpdate: (Book) -> Unit,
     onAdd: () -> Unit
 ) {
+    var bookToEdit by remember { mutableStateOf<Book?>(null) }
     Scaffold(
         bottomBar = {
             Column {
-                Button({onBack()}) {
+                Button(onClick = { onBack() }) {
                     Icon(
                         Icons.Default.Home,
                         "На главную"
                     )
+                    Text(" На главную")
                 }
             }
         }
-    ) {padding ->
+    ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text(
                     "Список книг",
-                    fontSize = 50.sp
+                    fontSize = 50.sp,
+                    modifier = Modifier.padding(start = 16.dp)
                 )
-                IconButton({onAdd()}) {
+                IconButton(onClick = { onAdd() }) {
                     Icon(
                         Icons.Default.Add,
                         "Добавить",
@@ -72,9 +84,12 @@ fun BABookListScreen(
                     )
                 }
             }
-            if (books.isEmpty())
-                Text("У вас пока нет книг")
-            else{
+
+            if (books.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("У вас пока нет книг", fontSize = 18.sp)
+                }
+            } else {
                 LazyColumn(modifier = Modifier.padding(top = 20.dp)) {
                     items(
                         books,
@@ -85,38 +100,22 @@ fun BABookListScreen(
                             }
                         }
                     ) { item ->
-                        when(item){
+                        when (item) {
                             is BookUiState.Loading -> {
-                                Box(modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     CircularProgressIndicator()
                                 }
                             }
                             is BookUiState.Success -> {
-                                val dismissState = rememberSwipeToDismissBoxState(
-                                    positionalThreshold = { totalDistance -> totalDistance * 0.4f },
-                                    confirmValueChange = { dismissValue ->
-                                        if (dismissValue == SwipeToDismissBoxValue.StartToEnd || dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                            onDelete(item.book)
-                                            true
-                                        } else false
-                                    }
-                                )
-                                SwipeToDismissBox(
-                                    dismissState,
-                                    backgroundContent = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(horizontal = 20.dp),
-                                            contentAlignment = Alignment.CenterEnd
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Удалить"
-                                            )
-                                        }
-                                    }
+                                SwipeToRevealCard(
+                                    book = item.book,
+                                    onEdit = { book ->
+                                        bookToEdit = book
+                                    },
+                                    onDelete = onDelete
                                 ) {
                                     Card(
                                         modifier = Modifier
@@ -124,31 +123,36 @@ fun BABookListScreen(
                                             .padding(vertical = 6.dp, horizontal = 12.dp)
                                     ) {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier
+                                                .fillMaxWidth()
                                                 .height(IntrinsicSize.Min)
                                         ) {
                                             Column(
                                                 modifier = Modifier
-                                                    .fillMaxWidth(0.7f)
+                                                    .weight(1f)
                                                     .fillMaxHeight()
-                                                    .clickable { onResume(item.book.id) }) {
+                                                    .clickable { onResume(item.book.id) }
+                                                    .padding(16.dp)
+                                            ) {
                                                 Text(
                                                     item.book.name,
-                                                    fontSize = 30.sp
-                                                )
-                                                Text(
-                                                    item.book.author,
                                                     fontSize = 20.sp
                                                 )
                                                 Text(
-                                                    "Страниц: " + item.book.pages.size.toString(),
-                                                    fontSize = 15.sp
+                                                    item.book.author,
+                                                    fontSize = 16.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Text(
+                                                    "Страниц: ${item.book.pages.size}",
+                                                    fontSize = 14.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                             Column(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
                                                     .fillMaxHeight()
+                                                    .padding(end = 16.dp)
                                                     .align(Alignment.CenterVertically)
                                                     .clickable { onSelect(item.book.id) },
                                                 verticalArrangement = Arrangement.Center,
@@ -156,8 +160,11 @@ fun BABookListScreen(
                                             ) {
                                                 Icon(
                                                     Icons.Default.Bookmarks,
-                                                    "Подробнее"
+                                                    "Подробнее",
+                                                    modifier = Modifier.size(32.dp),
+                                                    tint = MaterialTheme.colorScheme.primary
                                                 )
+                                                Text("Подробнее", fontSize = 12.sp)
                                             }
                                         }
                                     }
@@ -168,5 +175,18 @@ fun BABookListScreen(
                 }
             }
         }
+    }
+    bookToEdit?.let { book ->
+        BookDialog(
+            currentTitle = book.name,
+            onDismissRequest = {
+                bookToEdit = null
+            },
+            onConfirm = { newName ->
+                onUpdate(book.copy(name = newName))
+                bookToEdit = null
+            },
+            false
+        )
     }
 }

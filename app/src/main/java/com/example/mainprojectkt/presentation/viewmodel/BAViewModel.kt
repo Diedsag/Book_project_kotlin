@@ -22,8 +22,8 @@ import com.example.mainprojectkt.domain.usecase.GetUserBooksUseCase
 import com.example.mainprojectkt.domain.usecase.GetUserUseCase
 import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
+import com.example.mainprojectkt.domain.usecase.UpdateNoteUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
-import com.example.mainprojectkt.domain.usecase.UploadBookUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicLong
 class BAViewModel (
     val context: Context,
     val scanBookUseCase: ScanBookUseCase,
-    val uploadBookUseCase: UploadBookUseCase,
     val downloadBooksUseCase: DownloadBooksUseCase,
     val updateBookUseCase: UpdateBookUseCase,
     val updatePageUseCase: UpdatePageUseCase,
@@ -49,7 +48,8 @@ class BAViewModel (
     val deleteNoteUseCase: DeleteNoteUseCase,
     val addUserUseCase: AddUserUseCase,
     val getUserUseCase: GetUserUseCase,
-    val deleteBookUseCase: DeleteBookUseCase
+    val deleteBookUseCase: DeleteBookUseCase,
+    val updateNoteUseCase: UpdateNoteUseCase
 ) : ViewModel(
 ) {
     val tempIdCounter = AtomicLong(0L)
@@ -244,5 +244,21 @@ class BAViewModel (
             }
         }
         booksUiState.value = listOf()
+    }
+
+    fun changeName(book: Book){
+        booksUiState.value = booksUiState.value.map {element ->
+            if (element is BookUiState.Success && element.book.id == book.id) {
+                updateBookUseCase(book).launchIn(viewModelScope)
+                BookUiState.Success(book)
+            }
+            else element
+        }
+    }
+
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            updateNoteUseCase(note).collect {}
+        }
     }
 }

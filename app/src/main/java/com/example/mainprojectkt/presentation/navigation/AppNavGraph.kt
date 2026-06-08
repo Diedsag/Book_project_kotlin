@@ -1,13 +1,10 @@
 package com.example.mainprojectkt.presentation.navigation
 
-import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,12 +35,11 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             BAMainScreen(
-                {navController.navigate("pdf")},
                 {navController.navigate("books")},
                 {navController.navigate("register")},
                 {navController.navigate("login")},
                 viewModel::logout,
-                user
+                user,
             )
         }
         composable(
@@ -66,9 +62,11 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     viewModel::changePage,
                     viewModel::addNote,
                     {navController.navigate("home")},
+                    {navController.navigate("books")},
                     viewModel::deleteNote,
                     viewModel::changeColor,
-                    {navController.popBackStack()}
+                    {navController.popBackStack()},
+                    {navController.navigate("book/${curBookId}")}
                 )
             }
         }
@@ -83,9 +81,10 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             val note = notesState.find { it.id == id } ?: return@composable
             val activity = LocalActivity.current
             BANoteScreen(
-                note.text,
+                note = note,
                 {navController.navigate("home")},
-                {activity?.finish()}
+                {activity?.finish()},
+                viewModel::updateNote
             )
         }
         composable("pdf") {
@@ -108,6 +107,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 },
                 {navController.navigate("home")},
                 viewModel::deleteBook,
+                viewModel::changeName,
                 {navController.navigate("pdf")}
             )
         }
@@ -123,7 +123,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                     {num -> navController.navigate("page/${num}")
                         viewModel.changeLastNum(num)
                     },
-                    {navController.navigate("home")}
+                    {navController.navigate("home")},
+                    viewModel::changeName
                 )
             }
         }

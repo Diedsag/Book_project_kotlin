@@ -1,12 +1,10 @@
 package com.example.mainprojectkt.data.repository
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import androidx.core.graphics.toColorInt
 import androidx.room.withTransaction
 import com.example.mainprojectkt.data.local.BADataSource
 import com.example.mainprojectkt.data.local.BADatabase
@@ -25,15 +23,11 @@ import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.domain.model.StyleRange
 import com.example.mainprojectkt.domain.repository.BARepository
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 
 
 fun Book.toEntity() = BookEntity(
@@ -225,6 +219,11 @@ class BARepositoryImpl(
 
     override fun deleteBook(book: Book) = flow{
         database.bookDao().deleteBook(book.toEntity())
+        emit(Unit)
+    }.flowOn(Dispatchers.IO)
+
+    override fun updateNote(note: Note) = flow {
+        database.noteDao().updateNote(note.toEntity())
         emit(Unit)
     }.flowOn(Dispatchers.IO)
 }

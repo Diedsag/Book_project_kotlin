@@ -4,38 +4,28 @@ import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 import com.example.mainprojectkt.data.model.User
-import com.example.mainprojectkt.presentation.viewmodel.BookUiState
 import org.mindrot.jbcrypt.BCrypt
 
 
@@ -50,7 +40,34 @@ fun BARegisterScreen(
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("Требования к паролю: не менее 8 символов, наличие латиснких символов, цифр и специальных символов") }
+    fun checkData(){
+        if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
+            errorMessage = "Не все данные введены."
+        }
+        else if (password != repeatPassword) {
+            errorMessage = "Пароли не совпадают."
+        }
+        else if(!Regex("[A-Za-z]").containsMatchIn(password)){
+            errorMessage = "Пароль не содержит английских букв."
+        }
+        else if(!Regex("\\d").containsMatchIn(password)){
+            errorMessage = "Пароль не содержит цифр."
+        }
+        else if(!Regex("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)){
+            errorMessage = "Пароль не содержит специальных символов."
+        }
+        else if (password.length < 8) {
+            errorMessage = "Длина пароля меньше 8 символов."
+        }
+        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
+        {
+            errorMessage = "Почта введена не корректна."
+        }
+        else {
+            errorMessage = ""
+        }
+    }
     Scaffold(
         bottomBar = {
             Column() {
@@ -70,19 +87,25 @@ fun BARegisterScreen(
         ) {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it},
+                onValueChange = {
+                    name = it
+                    checkData()},
                 label = { Text("Имя") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it},
+                onValueChange = {
+                    email = it
+                    checkData()},
                 label = { Text("Почта") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it},
+                onValueChange = {
+                    password = it
+                    checkData()},
                 label = { Text("Пароль") },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -97,7 +120,9 @@ fun BARegisterScreen(
             )
             OutlinedTextField(
                 value = repeatPassword,
-                onValueChange = { repeatPassword = it},
+                onValueChange = {
+                    repeatPassword = it
+                    checkData()},
                 label = { Text("Повторите пароль") },
                 visualTransformation = if (repeatPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -115,29 +140,7 @@ fun BARegisterScreen(
                 modifier = Modifier.fillMaxWidth()
             ){
                 Button({
-                    if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
-                        errorMessage = "Не все данные введены."
-                    }
-                    else if (password != repeatPassword) {
-                        errorMessage = "Пароли не совпадают."
-                    }
-                    else if(!Regex("[A-Za-z]").containsMatchIn(password)){
-                        errorMessage = "Пароль не содержит английских букв."
-                    }
-                    else if(!Regex("\\d").containsMatchIn(password)){
-                        errorMessage = "Пароль не содержит цифр."
-                    }
-                    else if(!Regex("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)){
-                        errorMessage = "Пароль не содержит специальных символов."
-                    }
-                    else if (password.length < 8) {
-                        errorMessage = "Длина пароля меньше 8 символов."
-                    }
-                    else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-                    {
-                        errorMessage = "Почта введена не корректна."
-                    }
-                    else {
+                    if (errorMessage == "") {
                         onAdd(User(0, email, name, BCrypt.hashpw(password, BCrypt.gensalt()))){
                             result ->
                             if (result)

@@ -23,6 +23,7 @@ pdfiumAndroid = "1.9.0"
 pdfiumandroidVersion = "2.0.1"
 roomRuntime = "2.8.4"
 roomKtx = "2.8.4"
+composeMaterial = "1.6.2"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -58,6 +59,7 @@ layout-android = { module = "com.itextpdf.android:layout-android", version.ref =
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 pdfium-android = { module = "com.github.barteksc:pdfium-android", version.ref = "pdfiumAndroid" }
 pdfiumandroid = { module = "io.legere:pdfiumandroid", version.ref = "pdfiumandroidVersion" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
