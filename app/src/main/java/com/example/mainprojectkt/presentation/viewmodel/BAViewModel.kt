@@ -2,6 +2,7 @@ package com.example.mainprojectkt.presentation.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
@@ -109,13 +110,13 @@ class BAViewModel (
             }
         }
     }
-    fun scanBook(uri: Uri?) {
+    fun scanBook(uri: Uri?, styled: Boolean) {
         if (userId.value == -1L) return
         uri?.let { uri ->
             val newId = tempIdCounter.decrementAndGet()
             booksUiState.value += BookUiState.Loading(newId)
             viewModelScope.launch(Dispatchers.IO) {
-                val savedId = scanBookUseCase(uri, userId.value)
+                val savedId = scanBookUseCase(uri, styled, userId.value)
                 booksUiState.value = booksUiState.value.map { state ->
                     if (state is BookUiState.Loading && state.id == newId) {
                         BookUiState.Loading(savedId)
@@ -132,6 +133,8 @@ class BAViewModel (
                 val newPageCopy = newPage.copy(
                     styles = newPage.styles.toList()
                 )
+                Log.d("TAG", oldPage.styles.size.toString())
+                Log.d("TAG", newPageCopy.styles.size.toString())
                 val added = newPageCopy.styles.filterNot { oldPage.styles.contains(it) }
                 val deleted = oldPage.styles.filterNot { newPageCopy.styles.contains(it) }
                 val newBook: Book = element.book.copy(

@@ -288,24 +288,26 @@ fun BABookDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     item.styles.sortedBy { it.textRange.start }.forEach { style ->
-                                        Box(
-                                            modifier = Modifier
-                                                .width(6.dp)
-                                                .height(24.dp)
-                                                .clip(RoundedCornerShape(3.dp))
-                                                .background(style.spanStyle.background)
-                                                .then(
-                                                    if (style.link != null) {
-                                                        Modifier.border(
-                                                            width = 1.5.dp,
-                                                            color = MaterialTheme.colorScheme.tertiary,
-                                                            shape = RoundedCornerShape(3.dp)
-                                                        )
-                                                    } else {
-                                                        Modifier
-                                                    }
-                                                )
-                                        )
+                                        if(style.originalStyle?.backgroundColor != null) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(6.dp)
+                                                    .height(24.dp)
+                                                    .clip(RoundedCornerShape(3.dp))
+                                                    .background(style.spanStyle.background)
+                                                    .then(
+                                                        if (style.link != null) {
+                                                            Modifier.border(
+                                                                width = 1.5.dp,
+                                                                color = MaterialTheme.colorScheme.tertiary,
+                                                                shape = RoundedCornerShape(3.dp)
+                                                            )
+                                                        } else {
+                                                            Modifier
+                                                        }
+                                                    )
+                                            )
+                                        }
                                     }
                                 }
                             }

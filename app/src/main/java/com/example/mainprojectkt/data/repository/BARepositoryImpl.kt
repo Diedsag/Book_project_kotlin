@@ -1,9 +1,6 @@
 package com.example.mainprojectkt.data.repository
 
 import android.net.Uri
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.room.withTransaction
 import com.example.mainprojectkt.data.local.BADataSource
@@ -44,14 +41,17 @@ fun PageWithStyles.toEntity(bookId: Long) = PageEntity(
     text = text
 )
 
-fun StyleRange.toEntity(pageId: Long) = StyleEntity(
-    id = 0,
-    finish = textRange.end,
-    start = textRange.start,
-    pageId = pageId,
-    style = String.format("#%08X", spanStyle.background.toArgb()),
-    link = link
-)
+
+fun StyleRange.toEntity(pageId: Long): StyleEntity {
+    return StyleEntity(
+        id = 0,
+        pageId = pageId,
+        start = textRange.start,
+        finish = textRange.end,
+        link = link,
+        originalStyle = originalStyle
+    )
+}
 
 fun User.toEntity() = UserEntity(
     id = id,
@@ -82,9 +82,10 @@ fun PageEntity.toDomain(styles: List<StyleRange>, images: List<ImageData>) = Pag
 )
 fun StyleEntity.toDomain() = StyleRange(
     textRange = TextRange(start, finish),
-    spanStyle = SpanStyle(background = Color(style.removePrefix("#").toLong(16).toInt())),
+    originalStyle = originalStyle,
     link = link
 )
+
 
 fun UserEntity.toDomain() = User(
     id = id,
@@ -112,9 +113,9 @@ class BARepositoryImpl(
     val dataSource: BADataSource,
     val database: BADatabase
 ): BARepository{
-    override suspend fun scanBook(uri: Uri, userId: Long): Long {
+    override suspend fun scanBook(uri: Uri, styled: Boolean, userId: Long): Long {
         val info = dataSource.getBookInfo(uri)
-        val pages = dataSource.getPages(uri)
+        val pages = dataSource.getPages(uri, styled)
         var bookId = 0L
         database.withTransaction {
             val book = Book(
@@ -128,25 +129,18 @@ class BARepositoryImpl(
 
             database.userBookDao().addUserBook(UserBookEntity(0, userId, bookId))
 
-            val pageEntities = pages.map { page ->
-                page.toEntity(bookId)
-            }.sortedBy { it.number }
-            database.pageDao().addPages(pageEntities)
-        }
-        return bookId
-    }
-
-    override fun uploadBook(book: Book): Flow<Unit> {
-        return flow{
-            val bookId = database.bookDao().addBook(book.toEntity())
-            book.pages.forEach{ page ->
-                val pageId = database.pageDao().addPage(page.toEntity(bookId))
-                page.styles.forEach { style ->
-                    database.styleDao().addStyle(style.toEntity(pageId))
+            pages.forEach { pageWithStyles ->
+                val pageEntity = pageWithStyles.toEntity(bookId)
+                val pageId = database.pageDao().addPage(pageEntity)
+                if (pageWithStyles.styles.isNotEmpty()) {
+                    val styleEntities = pageWithStyles.styles.map { styleRange ->
+                        styleRange.toEntity(pageId)
+                    }
+                    database.styleDao().addStyles(styleEntities)
                 }
             }
-            emit(Unit)
-        }.flowOn(Dispatchers.IO)
+        }
+        return bookId
     }
 
     override fun downloadBooks(userId: Long): Flow<List<Book>> {
@@ -174,8 +168,8 @@ class BARepositoryImpl(
 
     override fun updatePage(pageId: Long, added: List<StyleRange>, deleted: List<StyleRange>): Flow<Unit> = flow {
         database.withTransaction {
-            database.styleDao().addStyles(added.map { it.toEntity(pageId) })
             database.styleDao().deleteStyles(deleted.map { Pair(it.textRange.start, it.textRange.end) })
+            database.styleDao().addStyles(added.map { it.toEntity(pageId) })
         }
         emit(Unit)
     }

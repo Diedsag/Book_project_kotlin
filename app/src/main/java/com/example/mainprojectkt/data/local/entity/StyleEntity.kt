@@ -4,8 +4,10 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.mainprojectkt.domain.model.TextStyleData
 
-@Entity(tableName = "Styles",
+@Entity(
+    tableName = "Styles",
     indices = [Index(value = ["pageId", "id"], unique = false)],
     foreignKeys = [
         ForeignKey(
@@ -16,11 +18,11 @@ import androidx.room.PrimaryKey
         )
     ]
 )
-data class StyleEntity (
+data class StyleEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val pageId: Long,
     val start: Int,
     val finish: Int,
-    val style: String,
-    val link: String?
+    val link: String?,
+    val originalStyle: TextStyleData? = null
 )

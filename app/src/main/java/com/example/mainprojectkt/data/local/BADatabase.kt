@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.mainprojectkt.data.local.dao.BookDao
 import com.example.mainprojectkt.data.local.dao.ImageDao
 import com.example.mainprojectkt.data.local.dao.NoteDao
@@ -21,7 +22,8 @@ import com.example.mainprojectkt.data.local.entity.UserEntity
 
 @Database(entities = [BookEntity::class, PageEntity::class, StyleEntity::class,
     UserEntity::class, UserBookEntity::class, NoteEntity::class, ImageEntity::class]
-    , version = 3, exportSchema = true)
+    , version = 5, exportSchema = true)
+@TypeConverters(Converters::class)
 abstract class BADatabase: RoomDatabase() {
     abstract fun bookDao(): BookDao
     abstract fun pageDao(): PageDao
@@ -36,6 +38,7 @@ abstract class BADatabase: RoomDatabase() {
 
         fun getDatabase(context: Context): BADatabase = instance ?: synchronized(this){
             Room.databaseBuilder(context, BADatabase::class.java, "main_database")
+                .fallbackToDestructiveMigration()
                 .build().also { instance = it }
         }
     }

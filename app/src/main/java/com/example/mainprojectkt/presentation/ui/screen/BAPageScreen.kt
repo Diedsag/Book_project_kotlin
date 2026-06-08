@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -55,11 +54,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
-import com.example.mainprojectkt.domain.model.StyleRange
 import com.example.mainprojectkt.presentation.ui.component.ColorChoicer
 import com.example.mainprojectkt.presentation.ui.component.NavButton
 import com.example.mainprojectkt.presentation.ui.component.NoteChoicer
+import com.example.mainprojectkt.presentation.ui.component.addSticker
 import com.example.mainprojectkt.presentation.ui.component.buildPage
+import com.example.mainprojectkt.presentation.ui.component.cutSticker
+import com.example.mainprojectkt.presentation.ui.component.deleteNote
+
 
 @Composable
 fun BAPageScreen(
@@ -130,7 +132,6 @@ fun BAPageScreen(
     val currentColor by rememberUpdatedState(curColor)
     val currentPage by rememberUpdatedState(page)
     val currentSelection by rememberUpdatedState(safeSelection)
-
     Scaffold(
         bottomBar = {
             Surface(
@@ -143,22 +144,24 @@ fun BAPageScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical =12.dp)
                 ) {
-                    Slider(
-                        value = page.number.toFloat(),
-                        onValueChange = { onMove(it.toInt()) },
-                        valueRange = 1f..nPages.toFloat(),
-                        steps = (nPages - 2).coerceAtLeast(0),
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                            activeTickColor = MaterialTheme.colorScheme.onPrimary,
-                            inactiveTickColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
+                    if (nPages > 1) {
+                        Slider(
+                            value = page.number.toFloat(),
+                            onValueChange = { onMove(it.toInt()) },
+                            valueRange = 1f..nPages.toFloat(),
+                            steps = (nPages - 2).coerceAtLeast(0),
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                                activeTickColor = MaterialTheme.colorScheme.onPrimary,
+                                inactiveTickColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -174,13 +177,22 @@ fun BAPageScreen(
                             label = "Оглавление",
                             onClick = { onTable() }
                         )
+                        NavButton(
+                            icon = Icons.Default.Palette,
+                            label = "Цвет",
+                            onClick = { showColorChoicer = true }
+                        )
+                        NavButton(
+                            icon = Icons.AutoMirrored.Filled.LibraryBooks,
+                            label = "Книги",
+                            onClick = { onList() }
+                        )
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                            Column(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                             ) {
                                 Text(
@@ -198,16 +210,6 @@ fun BAPageScreen(
                                 )
                             }
                         }
-                        NavButton(
-                            icon = Icons.Default.Palette,
-                            label = "Цвет",
-                            onClick = { showColorChoicer = true }
-                        )
-                        NavButton(
-                            icon = Icons.AutoMirrored.Filled.LibraryBooks,
-                            label = "Книги",
-                            onClick = { onList() }
-                        )
                     }
                 }
             }
@@ -397,49 +399,4 @@ fun BAPageScreen(
             }
         }
     }
-}
-
-fun addSticker(
-    styles: List<StyleRange>,
-    selection: TextRange,
-    color: Color,
-    link: String?
-): List<StyleRange> {
-    if (selection.start == selection.end) return styles
-
-    val newStyle = StyleRange(selection, SpanStyle(background = color), link)
-    return (styles + newStyle).sortedBy { it.link != null }
-}
-
-fun cutSticker(styles: List<StyleRange>, selection: TextRange): List<StyleRange> {
-    val newStyles = mutableListOf<StyleRange>()
-    for (style in styles) {
-        val start = style.textRange.start
-        val end = style.textRange.end
-        val tStart = selection.start
-        val tEnd = selection.end
-        if (end <= tStart || start >= tEnd || style.link != null) {
-            newStyles.add(style)
-        } else {
-            if (start < tStart) newStyles.add(style.copy(textRange = TextRange(start, tStart)))
-            if (end > tEnd) newStyles.add(style.copy(textRange = TextRange(tEnd, end)))
-        }
-    }
-    return newStyles
-}
-fun deleteNote(
-    styles: List<StyleRange>,
-    selection: TextRange,
-    onDelete: (Long) -> Unit
-): List<StyleRange> {
-    val newStyles = mutableListOf<StyleRange>()
-    for (style in styles) {
-        if (style.link != null && selection.intersects(style.textRange)) {
-            val id = style.link.removeSurrounding("myapp://note/", "").toLongOrNull()
-            if (id != null) onDelete(id)
-        } else {
-            newStyles.add(style)
-        }
-    }
-    return newStyles
 }

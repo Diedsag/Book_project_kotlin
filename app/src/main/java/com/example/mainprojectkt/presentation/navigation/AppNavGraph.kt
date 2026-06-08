@@ -17,7 +17,7 @@ import com.example.mainprojectkt.presentation.ui.screen.BALoginScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAMainScreen
 import com.example.mainprojectkt.presentation.ui.screen.BANoteScreen
 import com.example.mainprojectkt.presentation.ui.screen.BAPageScreen
-import com.example.mainprojectkt.presentation.ui.screen.BAPdfChoiceScreen
+import com.example.mainprojectkt.presentation.ui.screen.BAScanScreen
 import com.example.mainprojectkt.presentation.ui.screen.BARegisterScreen
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 import com.example.mainprojectkt.presentation.viewmodel.BookUiState
@@ -88,9 +88,9 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
             )
         }
         composable("pdf") {
-            BAPdfChoiceScreen(
+            BAScanScreen(
                 viewModel::scanBook,
-                {navController.popBackStack()}
+                navController::popBackStack
             )
         }
         composable("books") {
