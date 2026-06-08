@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.2"
+appcompat = "1.7.1"
 bcrypt = "0.10.2"
 coilCompose = "2.7.0"
 composeColorPicker = "0.7.0"
@@ -26,6 +27,7 @@ roomKtx = "2.8.4"
 composeMaterial = "1.6.2"
 
 [libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }

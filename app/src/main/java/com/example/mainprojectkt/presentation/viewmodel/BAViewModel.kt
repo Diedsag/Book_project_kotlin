@@ -2,7 +2,7 @@ package com.example.mainprojectkt.presentation.viewmodel
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.graphics.Color
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
@@ -25,6 +25,7 @@ import com.example.mainprojectkt.domain.usecase.ScanBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateBookUseCase
 import com.example.mainprojectkt.domain.usecase.UpdateNoteUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
+import com.example.mainprojectkt.presentation.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BAViewModel (
-    val context: Context,
+    context: Context,
     val scanBookUseCase: ScanBookUseCase,
     val downloadBooksUseCase: DownloadBooksUseCase,
     val updateBookUseCase: UpdateBookUseCase,
@@ -60,7 +61,9 @@ class BAViewModel (
     var notesState: MutableStateFlow<List<Note>> = MutableStateFlow(listOf())
     var colorState: MutableStateFlow<Color> = MutableStateFlow(Color.Green)
     var curBookId = MutableStateFlow<Long?>(null)
+    val themeModeState: MutableStateFlow<ThemeMode> = MutableStateFlow(ThemeMode.SYSTEM)
     private val dataStore = (context.applicationContext as BookApplication).dataStore
+
     init{
         viewModelScope.launch {
             userId.flatMapLatest { id ->
@@ -78,8 +81,17 @@ class BAViewModel (
         }
 
         viewModelScope.launch {
-            dataStore.data.collect { account ->
-                userId.value = account[PreferencesKeys.USER_ID] ?: -1
+            dataStore.data.collect { prefs ->
+                userId.value = prefs[PreferencesKeys.USER_ID] ?: -1L
+                val modeStr = prefs[PreferencesKeys.THEME_MODE] ?: "SYSTEM"
+                val newMode = when (modeStr) {
+                    "LIGHT" -> ThemeMode.LIGHT
+                    "DARK" -> ThemeMode.DARK
+                    else -> ThemeMode.SYSTEM
+                }
+                if (themeModeState.value != newMode) {
+                    themeModeState.value = newMode
+                }
             }
         }
 
@@ -133,8 +145,6 @@ class BAViewModel (
                 val newPageCopy = newPage.copy(
                     styles = newPage.styles.toList()
                 )
-                Log.d("TAG", oldPage.styles.size.toString())
-                Log.d("TAG", newPageCopy.styles.size.toString())
                 val added = newPageCopy.styles.filterNot { oldPage.styles.contains(it) }
                 val deleted = oldPage.styles.filterNot { newPageCopy.styles.contains(it) }
                 val newBook: Book = element.book.copy(
@@ -262,6 +272,42 @@ class BAViewModel (
     fun updateNote(note: Note) {
         viewModelScope.launch {
             updateNoteUseCase(note).collect {}
+        }
+    }
+
+    fun changeTheme(newMode: ThemeMode) {
+        themeModeState.value = newMode
+        viewModelScope.launch {
+            dataStore.edit { prefs ->
+                prefs[PreferencesKeys.THEME_MODE] = when (newMode) {
+                    ThemeMode.SYSTEM -> "SYSTEM"
+                    ThemeMode.LIGHT -> "LIGHT"
+                    ThemeMode.DARK -> "DARK"
+                }
+            }
+        }
+        applyTheme(newMode)
+    }
+
+    fun applyTheme(mode: ThemeMode) {
+        AppCompatDelegate.setDefaultNightMode(
+            when (mode) {
+                ThemeMode.SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                ThemeMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+            }
+        )
+    }
+
+    fun getInitialThemeSync(): ThemeMode {
+        return kotlinx.coroutines.runBlocking {
+            val prefs = dataStore.data.first()
+            val modeStr = prefs[PreferencesKeys.THEME_MODE] ?: "SYSTEM"
+            when (modeStr) {
+                "LIGHT" -> ThemeMode.LIGHT
+                "DARK" -> ThemeMode.DARK
+                else -> ThemeMode.SYSTEM
+            }
         }
     }
 }

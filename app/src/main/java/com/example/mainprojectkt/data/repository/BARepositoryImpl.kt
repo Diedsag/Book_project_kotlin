@@ -115,7 +115,7 @@ class BARepositoryImpl(
 ): BARepository{
     override suspend fun scanBook(uri: Uri, styled: Boolean, userId: Long): Long {
         val info = dataSource.getBookInfo(uri)
-        val pages = dataSource.getPages(uri, styled)
+        val pages = dataSource.getPages(uri, styled).sortedBy { it.number }
         var bookId = 0L
         database.withTransaction {
             val book = Book(

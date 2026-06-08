@@ -4,10 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -28,6 +32,7 @@ import com.example.mainprojectkt.domain.usecase.UpdateNoteUseCase
 import com.example.mainprojectkt.domain.usecase.UpdatePageUseCase
 import com.example.mainprojectkt.presentation.navigation.AppNavGraph
 import com.example.mainprojectkt.presentation.theme.AppTheme
+import com.example.mainprojectkt.presentation.theme.ThemeMode
 import com.example.mainprojectkt.presentation.viewmodel.BAViewModel
 
 class MainActivity : ComponentActivity() {
@@ -70,10 +75,26 @@ class MainActivity : ComponentActivity() {
             deleteBookUseCase,
             updateNoteUseCase
         )
+        val initialTheme = viewModel.getInitialThemeSync()
+
+        applyAppCompatTheme(initialTheme)
+
         setContent {
             navController = rememberNavController()
-            AppTheme {
-                Scaffold() { paddingValues ->
+            val themeMode by viewModel.themeModeState.collectAsState(initial = initialTheme)
+            val isSystemDark = isSystemInDarkTheme()
+
+            val isDark = when (themeMode) {
+                ThemeMode.SYSTEM -> isSystemDark
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+
+            AppTheme(
+                darkTheme = isDark,
+                dynamicColor = false
+            ) {
+                Scaffold { paddingValues ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -87,5 +108,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun applyAppCompatTheme(mode: ThemeMode) {
+        AppCompatDelegate.setDefaultNightMode(
+            when (mode) {
+                ThemeMode.SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                ThemeMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+            }
+        )
     }
 }

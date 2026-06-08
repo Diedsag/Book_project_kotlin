@@ -275,13 +275,6 @@ fun BABookDetailScreen(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(
-                                text = "Страница ${item.number}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-
                             if (item.styles.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row(

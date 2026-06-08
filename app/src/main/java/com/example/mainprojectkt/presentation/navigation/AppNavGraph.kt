@@ -29,6 +29,7 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
     val notesState by viewModel.notesState.collectAsStateWithLifecycle()
     val colorState by viewModel.colorState.collectAsStateWithLifecycle()
     val user by viewModel.userState.collectAsStateWithLifecycle()
+    val themeState by viewModel.themeModeState.collectAsStateWithLifecycle()
     val bookNotesState = remember(curBookId, booksState, notesState) {
         viewModel.getBookNotes()
     }
@@ -40,6 +41,8 @@ fun AppNavGraph(navController: NavHostController, viewModel: BAViewModel) {
                 {navController.navigate("login")},
                 viewModel::logout,
                 user,
+                themeState,
+                viewModel::changeTheme
             )
         }
         composable(

@@ -10,15 +10,18 @@ import com.itextpdf.kernel.pdf.canvas.parser.EventType
 import com.itextpdf.kernel.pdf.canvas.parser.data.IEventData
 import com.itextpdf.kernel.pdf.canvas.parser.data.TextRenderInfo
 import com.itextpdf.kernel.pdf.canvas.parser.listener.ITextExtractionStrategy
+import kotlin.math.abs
 
 class TextStyleStrategy : ITextExtractionStrategy {
-    val textBuilder = StringBuilder()
+    private val textBuilder = StringBuilder()
     private val styleRanges = mutableListOf<StyleRange>()
     private var currentChunk: TextChunk? = null
-    var lastBaselineY: Float? = null
-    var lastEndX: Float? = null
-    var lastFontSize: Float = 12f
-    var normalBaselineY: Float? = null
+
+    private var lastBaselineY: Float? = null
+    private var lastEndX: Float? = null
+    private var lastFontSize: Float = 12f
+    private val fontSizeSamples = mutableListOf<Float>()
+    private var dominantFontSize: Float? = null
 
     override fun getResultantText(): String {
         flushChunk()
@@ -38,16 +41,25 @@ class TextStyleStrategy : ITextExtractionStrategy {
         if (text.isNullOrEmpty()) return
 
         val baseline = renderInfo.baseline
-        val startPoint = baseline.startPoint
-        val endPoint = baseline.endPoint
+        val startPoint = baseline.getStartPoint() ?: return
+        val endPoint = baseline.getEndPoint() ?: startPoint
 
-        val currentBaselineY = startPoint?.get(1) ?: return
+        val currentBaselineY = startPoint.get(1)
         val currentStartX = startPoint.get(0)
-        val currentEndX = endPoint?.get(0) ?: currentStartX
+        val currentEndX = endPoint.get(0)
 
         val font = renderInfo.font
         val fontSize = renderInfo.fontSize
         val fontName = font.fontProgram?.fontNames?.fontName ?: "Default"
+
+        fontSizeSamples.add(fontSize)
+        if (fontSizeSamples.size >= 20 && dominantFontSize == null) {
+            dominantFontSize = fontSizeSamples
+                .groupingBy { it.toInt() }
+                .eachCount()
+                .maxByOrNull { it.value }
+                ?.key?.toFloat()
+        }
 
         val isBold = fontName.lowercase().contains("bold") || fontName.lowercase().contains("black")
         val isItalic = fontName.lowercase().contains("italic") || fontName.lowercase().contains("oblique")
@@ -69,48 +81,31 @@ class TextStyleStrategy : ITextExtractionStrategy {
             else -> Color.BLACK
         }
 
-        val indexType: String
-        val isIndex = fontSize < lastFontSize * 0.9f
+        val indexType = determineIndexType(
+            currentFontSize = fontSize,
+            currentBaselineY = currentBaselineY,
+            currentStartX = currentStartX
+        )
 
-        if (isIndex && normalBaselineY != null) {
-            val baselineDiff = currentBaselineY - normalBaselineY!!
-            val threshold = lastFontSize * 0.2f
-            indexType = when {
-                baselineDiff > threshold -> "superscript"
-                baselineDiff < -threshold -> "subscript"
-                else -> "normal"
-            }
-        } else {
-            indexType = "normal"
-            normalBaselineY = currentBaselineY
-        }
         lastBaselineY?.let { prevY ->
             val yDiff = prevY - currentBaselineY
-            val effectiveYDiff = if (indexType == "superscript" || indexType == "subscript") {
-                (normalBaselineY ?: prevY) - (normalBaselineY ?: prevY)
-            } else {
-                yDiff
-            }
-
-            if (indexType == "normal" && effectiveYDiff > lastFontSize * 0.5f) {
+            if (indexType == "normal" && abs(yDiff) > lastFontSize * 0.5f) {
                 flushChunk()
                 textBuilder.append('\n')
-                lastBaselineY = currentBaselineY
                 lastEndX = null
-                normalBaselineY = currentBaselineY
-            } else if (indexType == "normal" && effectiveYDiff < -lastFontSize * 0.5f) {
-                flushChunk()
-                textBuilder.append('\n')
-                lastBaselineY = currentBaselineY
-                lastEndX = null
-                normalBaselineY = currentBaselineY
-            } else {
+            } else if (indexType == "normal") {
                 lastEndX?.let { prevEndX ->
                     val horizontalGap = currentStartX - prevEndX
                     val spaceThreshold = lastFontSize * 0.25f
-                    if (horizontalGap > spaceThreshold && textBuilder.isNotEmpty() && !textBuilder.endsWith(' ') && !textBuilder.endsWith('\n')) {
-                        val spaceChunk = TextChunk(" ",
-                            TextStyleData(fontSize, "normal", fontName, isBold, isItalic, colorArgb))
+                    if (horizontalGap > spaceThreshold &&
+                        textBuilder.isNotEmpty() &&
+                        !textBuilder.endsWith(' ') &&
+                        !textBuilder.endsWith('\n')) {
+                        val spaceStyle = TextStyleData(
+                            size = fontSize, font = fontName,
+                            bold = isBold, italic = isItalic, color = colorArgb
+                        )
+                        val spaceChunk = TextChunk(" ", spaceStyle)
                         if (currentChunk != null && currentChunk!!.canMerge(spaceChunk)) {
                             currentChunk!!.text += " "
                         } else {
@@ -119,19 +114,23 @@ class TextStyleStrategy : ITextExtractionStrategy {
                         }
                     }
                 }
-                if (indexType == "normal") {
-                    lastBaselineY = currentBaselineY
-                }
             }
-        } ?: run {
-            lastBaselineY = currentBaselineY
-            normalBaselineY = currentBaselineY
         }
 
+        if (indexType == "normal") {
+            lastBaselineY = currentBaselineY
+        }
         lastFontSize = fontSize
         lastEndX = currentEndX
 
-        val textStyle = TextStyleData(fontSize, indexType, fontName, isBold, isItalic, colorArgb)
+        val textStyle = TextStyleData(
+            size = fontSize,
+            index = indexType,
+            font = fontName,
+            bold = isBold,
+            italic = isItalic,
+            color = colorArgb
+        )
         val newChunk = TextChunk(text, textStyle)
 
         if (currentChunk == null) {
@@ -141,6 +140,38 @@ class TextStyleStrategy : ITextExtractionStrategy {
         } else {
             flushChunk()
             currentChunk = newChunk
+        }
+    }
+
+    private fun determineIndexType(
+        currentFontSize: Float,
+        currentBaselineY: Float,
+        currentStartX: Float
+    ): String {
+        val prevY = lastBaselineY ?: return "normal"
+        val prevEndX = lastEndX ?: return "normal"
+
+        val domSize = dominantFontSize ?: currentFontSize
+        val isSmallEnough = when {
+            currentFontSize <= 8f -> true
+            currentFontSize > 12f -> false
+            else -> currentFontSize <= domSize * 0.75f
+        }
+        if (!isSmallEnough) return "normal"
+
+        val yDiff = abs(currentBaselineY - prevY)
+        val onSameLine = yDiff <= lastFontSize * 0.3f
+        if (!onSameLine) return "normal"
+
+        val horizontalGap = currentStartX - prevEndX
+        val immediatelyAfter = horizontalGap <= lastFontSize * 0.2f
+        if (!immediatelyAfter) return "normal"
+
+        val baselineShift = currentBaselineY - prevY
+        return when {
+            baselineShift > currentFontSize * 0.2f -> "superscript"
+            baselineShift < -currentFontSize * 0.2f -> "subscript"
+            else -> "normal"
         }
     }
 

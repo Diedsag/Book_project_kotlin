@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.compose.color.picker)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
+import com.example.mainprojectkt.presentation.ui.component.BrowserDialog
 import com.example.mainprojectkt.presentation.ui.component.ColorChoicer
 import com.example.mainprojectkt.presentation.ui.component.NavButton
 import com.example.mainprojectkt.presentation.ui.component.NoteChoicer
@@ -132,6 +133,11 @@ fun BAPageScreen(
     val currentColor by rememberUpdatedState(curColor)
     val currentPage by rememberUpdatedState(page)
     val currentSelection by rememberUpdatedState(safeSelection)
+
+
+    var showBrowserDialog by remember { mutableStateOf(false) }
+
+
     Scaffold(
         bottomBar = {
             Surface(
@@ -295,6 +301,11 @@ fun BAPageScreen(
                                             close()
                                         }
                                         separator()
+                                        item(key = "AddBrowserLink", label = "Добавить ссылку из браузера") {
+                                            showBrowserDialog = true
+                                            close()
+                                        }
+                                        separator()
                                         item(key = "DeleteNote", label = "Убрать заметку") {
                                             val newStyles = deleteNote(currentPage.styles, currentSelection) { id ->
                                                 onDeleteNote(id)
@@ -377,6 +388,32 @@ fun BAPageScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { noteText = ""; showNoteState = 0 }) { Text("Отмена") }
+                    }
+                )
+            }
+
+            if (showBrowserDialog) {
+                BrowserDialog(
+                    quit = {
+                        showBrowserDialog = false
+                    },
+                    complete = { url ->
+                        val newStyles = addSticker(
+                            page.styles,
+                            safeSelection,
+                            curColor,
+                            url
+                        )
+                        onChangeStyle(
+                            PageWithStyles(
+                                page.id,
+                                page.number,
+                                page.text,
+                                newStyles,
+                                page.images
+                            )
+                        )
+                        showBrowserDialog = false
                     }
                 )
             }
