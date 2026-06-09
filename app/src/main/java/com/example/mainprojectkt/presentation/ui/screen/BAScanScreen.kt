@@ -3,14 +3,40 @@ package com.example.mainprojectkt.presentation.ui.screen
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.mainprojectkt.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +62,7 @@ fun BAScanScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Сканирование книги",
+                        text = stringResource(R.string.screen_scan_title),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -44,7 +70,7 @@ fun BAScanScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.nav_back)
                         )
                     }
                 },
@@ -71,7 +97,7 @@ fun BAScanScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Режим сканирования:",
+                        text = stringResource(R.string.label_scan_mode),
                         style = MaterialTheme.typography.titleMedium
                     )
 
@@ -90,11 +116,11 @@ fun BAScanScreen(
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Text(
-                                text = "Формат документа",
+                                text = stringResource(R.string.label_scan_format_doc),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = "Сохраняет форматирование: шрифты, цвета, размеры, индексы",
+                                text = stringResource(R.string.desc_scan_format_doc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -114,11 +140,11 @@ fun BAScanScreen(
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Text(
-                                text = "Единый формат",
+                                text = stringResource(R.string.label_scan_format_plain),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = "Извлекает только текст без форматирования",
+                                text = stringResource(R.string.desc_scan_format_plain),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -133,18 +159,18 @@ fun BAScanScreen(
                 onClick = { filePickerLauncher.launch("application/pdf") },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Выбрать PDF файл")
+                Text(stringResource(R.string.btn_choose_pdf))
             }
 
             if (showConfirmationDialog) {
                 AlertDialog(
                     onDismissRequest = { showConfirmationDialog = false },
-                    title = { Text("Подтверждение") },
+                    title = { Text(stringResource(R.string.dialog_confirm_title)) },
                     text = {
                         Column {
-                            Text("Режим сканирования: ${if (scanMode) "Формат документа" else "Единый формат"}")
+                            Text(stringResource(R.string.dialog_scan_mode_text, if (scanMode) stringResource(R.string.label_scan_format_doc) else stringResource(R.string.label_scan_format_plain)))
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Начать сканирование?")
+                            Text(stringResource(R.string.dialog_scan_start))
                         }
                     },
                     confirmButton = {
@@ -157,14 +183,14 @@ fun BAScanScreen(
                                 }
                             }
                         ) {
-                            Text("Сканировать")
+                            Text(stringResource(R.string.btn_scan))
                         }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = { showConfirmationDialog = false }
                         ) {
-                            Text("Отмена")
+                            Text(stringResource(R.string.btn_cancel))
                         }
                     }
                 )

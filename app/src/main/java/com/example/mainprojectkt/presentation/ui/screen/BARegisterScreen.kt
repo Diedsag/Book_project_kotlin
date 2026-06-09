@@ -23,11 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.data.model.User
 import org.mindrot.jbcrypt.BCrypt
-
 
 @Composable
 fun BARegisterScreen(
@@ -40,46 +41,59 @@ fun BARegisterScreen(
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("Требования к паролю: не менее 8 символов, наличие латиснких символов, цифр и специальных символов") }
-    fun checkData(){
-        if(email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
-            errorMessage = "Не все данные введены."
-        }
-        else if (password != repeatPassword) {
-            errorMessage = "Пароли не совпадают."
-        }
-        else if(!Regex("[A-Za-z]").containsMatchIn(password)){
-            errorMessage = "Пароль не содержит английских букв."
-        }
-        else if(!Regex("\\d").containsMatchIn(password)){
-            errorMessage = "Пароль не содержит цифр."
-        }
-        else if(!Regex("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)){
-            errorMessage = "Пароль не содержит специальных символов."
-        }
-        else if (password.length < 8) {
-            errorMessage = "Длина пароля меньше 8 символов."
-        }
-        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-        {
-            errorMessage = "Почта введена не корректна."
-        }
-        else {
+
+    val hintPasswordRequirements = stringResource(R.string.hint_password_requirements)
+    val errorIncompleteData = stringResource(R.string.error_incomplete_data)
+    val errorPasswordsMismatch = stringResource(R.string.error_passwords_mismatch)
+    val errorPasswordNoLetters = stringResource(R.string.error_password_no_letters)
+    val errorPasswordNoDigits = stringResource(R.string.error_password_no_digits)
+    val errorPasswordNoSpecial = stringResource(R.string.error_password_no_special)
+    val errorPasswordTooShort = stringResource(R.string.error_password_too_short)
+    val errorInvalidEmail = stringResource(R.string.error_invalid_email)
+    val errorEmailRegistered = stringResource(R.string.error_email_registered)
+    val labelName = stringResource(R.string.label_name)
+    val labelEmail = stringResource(R.string.label_email)
+    val labelPassword = stringResource(R.string.label_password)
+    val labelRepeatPassword = stringResource(R.string.label_repeat_password)
+    val descHidePassword = stringResource(R.string.desc_hide_password)
+    val descShowPassword = stringResource(R.string.desc_show_password)
+    val navHome = stringResource(R.string.nav_home)
+    val btnRegister = stringResource(R.string.btn_register)
+
+    var errorMessage by remember { mutableStateOf(hintPasswordRequirements) }
+
+    fun checkData() {
+        if (email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() || name.isEmpty()) {
+            errorMessage = errorIncompleteData
+        } else if (password != repeatPassword) {
+            errorMessage = errorPasswordsMismatch
+        } else if (!Regex("[A-Za-z]").containsMatchIn(password)) {
+            errorMessage = errorPasswordNoLetters
+        } else if (!Regex("\\d").containsMatchIn(password)) {
+            errorMessage = errorPasswordNoDigits
+        } else if (!Regex("[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").containsMatchIn(password)) {
+            errorMessage = errorPasswordNoSpecial
+        } else if (password.length < 8) {
+            errorMessage = errorPasswordTooShort
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            errorMessage = errorInvalidEmail
+        } else {
             errorMessage = ""
         }
     }
+
     Scaffold(
         bottomBar = {
-            Column() {
-                Button({onBack()}) {
+            Column {
+                Button({ onBack() }) {
                     Icon(
                         Icons.Default.Home,
-                        "На главную"
+                        navHome
                     )
                 }
             }
         }
-    ) {padding ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -89,30 +103,33 @@ fun BARegisterScreen(
                 value = name,
                 onValueChange = {
                     name = it
-                    checkData()},
-                label = { Text("Имя") },
+                    checkData()
+                },
+                label = { Text(labelName) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = email,
                 onValueChange = {
                     email = it
-                    checkData()},
-                label = { Text("Почта") },
+                    checkData()
+                },
+                label = { Text(labelEmail) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = {
                     password = it
-                    checkData()},
-                label = { Text("Пароль") },
+                    checkData()
+                },
+                label = { Text(labelPassword) },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
+                            contentDescription = if (passwordVisible) descHidePassword else descShowPassword
                         )
                     }
                 },
@@ -122,14 +139,15 @@ fun BARegisterScreen(
                 value = repeatPassword,
                 onValueChange = {
                     repeatPassword = it
-                    checkData()},
-                label = { Text("Повторите пароль") },
+                    checkData()
+                },
+                label = { Text(labelRepeatPassword) },
                 visualTransformation = if (repeatPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { repeatPasswordVisible = !repeatPasswordVisible }) {
                         Icon(
                             if (repeatPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (repeatPasswordVisible) "Скрыть пароль" else "Показать пароль"
+                            contentDescription = if (repeatPasswordVisible) descHidePassword else descShowPassword
                         )
                     }
                 },
@@ -138,19 +156,18 @@ fun BARegisterScreen(
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 Button({
                     if (errorMessage == "") {
-                        onAdd(User(0, email, name, BCrypt.hashpw(password, BCrypt.gensalt()))){
-                            result ->
+                        onAdd(User(0, email, name, BCrypt.hashpw(password, BCrypt.gensalt()))) { result ->
                             if (result)
                                 onBack()
                             else
-                                errorMessage = "Почта уже зарегистрирована."
+                                errorMessage = errorEmailRegistered
                         }
                     }
                 }) {
-                    Text("Зарегистрироваться")
+                    Text(btnRegister)
                 }
             }
             Text(errorMessage)

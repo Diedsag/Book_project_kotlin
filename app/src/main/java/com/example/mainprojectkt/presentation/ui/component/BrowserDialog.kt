@@ -16,8 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.mainprojectkt.R
 
 @Composable
 fun BrowserDialog(
@@ -28,7 +30,7 @@ fun BrowserDialog(
 
     AlertDialog(
         onDismissRequest = quit,
-        title = { Text("Выберите страницу") },
+        title = { Text(stringResource(R.string.dialog_browser_title)) },
         text = {
             Box(
                 modifier = Modifier
@@ -62,12 +64,12 @@ fun BrowserDialog(
         },
         confirmButton = {
             Button(onClick = { complete(currentUrl) }) {
-                Text("Добавить ссылку")
+                Text(stringResource(R.string.btn_add_link))
             }
         },
         dismissButton = {
             TextButton(onClick = quit) {
-                Text("Отмена")
+                Text(stringResource(R.string.btn_cancel))
             }
         }
     )

@@ -24,8 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Note
 
 @Composable
@@ -33,7 +36,7 @@ fun FilterDropdown(
     curFilter: Int,
     onFilterChange: (Int) -> Unit
 ) {
-    val filters = listOf("Все", "Текущей книги")
+    val filters = listOf(stringResource(R.string.filter_all), stringResource(R.string.filter_current_book))
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -127,9 +130,11 @@ fun NoteChoicer(
             if (elements.isEmpty()) {
                 item {
                     Text(
-                        text = "Нет заметок для отображения",
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        text = stringResource(R.string.info_no_notes),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
                         color = Color.Gray
                     )
                 }

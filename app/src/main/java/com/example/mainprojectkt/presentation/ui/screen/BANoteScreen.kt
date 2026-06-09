@@ -20,8 +20,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Note
 
 @Composable
@@ -40,13 +42,13 @@ fun BANoteScreen(
                     Button({ onHome() }) {
                         Icon(
                             Icons.Default.Home,
-                            "На главную"
+                            stringResource(R.string.nav_home)
                         )
                     }
                     Button({ onBack() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            "Назад"
+                            stringResource(R.string.nav_back)
                         )
                     }
                     Button(
@@ -57,7 +59,7 @@ fun BANoteScreen(
                     ) {
                         Icon(
                             Icons.Default.Save,
-                            "Сохранить"
+                            stringResource(R.string.btn_save)
                         )
                     }
                 }
@@ -66,14 +68,14 @@ fun BANoteScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             Text(
-                "Заметка",
+                stringResource(R.string.screen_note_title),
                 fontSize = 30.sp,
                 modifier = Modifier.padding(bottom = 16.dp, start = 16.dp, top = 16.dp)
             )
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("Текст заметки") },
+                label = { Text(stringResource(R.string.label_note_text)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)

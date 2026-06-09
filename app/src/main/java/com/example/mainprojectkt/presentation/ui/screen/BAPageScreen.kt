@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Note
 import com.example.mainprojectkt.domain.model.PageWithStyles
 import com.example.mainprojectkt.presentation.ui.component.BrowserDialog
@@ -62,7 +64,6 @@ import com.example.mainprojectkt.presentation.ui.component.addSticker
 import com.example.mainprojectkt.presentation.ui.component.buildPage
 import com.example.mainprojectkt.presentation.ui.component.cutSticker
 import com.example.mainprojectkt.presentation.ui.component.deleteNote
-
 
 @Composable
 fun BAPageScreen(
@@ -93,6 +94,26 @@ fun BAPageScreen(
     var noteText by remember { mutableStateOf("") }
     var curFilter by remember { mutableIntStateOf(0) }
     var noteChosen: Note? by remember { mutableStateOf(null) }
+
+    val navHome = stringResource(R.string.nav_home)
+    val navContents = stringResource(R.string.nav_contents)
+    val navColor = stringResource(R.string.nav_color)
+    val navBooks = stringResource(R.string.nav_books)
+
+    val menuChangeColor = stringResource(R.string.menu_change_color)
+    val menuAddSticker = stringResource(R.string.menu_add_sticker)
+    val menuRemoveSticker = stringResource(R.string.menu_remove_sticker)
+    val menuAddNote = stringResource(R.string.menu_add_note)
+    val menuChooseNote = stringResource(R.string.menu_choose_note)
+    val menuAddBrowserLink = stringResource(R.string.menu_add_browser_link)
+    val menuRemoveNote = stringResource(R.string.menu_remove_note)
+
+    val dialogNoteTitle = stringResource(R.string.dialog_note_title)
+    val dialogNotesTitle = stringResource(R.string.dialog_notes_title)
+    val dialogColorTitle = stringResource(R.string.dialog_color_title)
+    val labelText = stringResource(R.string.label_text)
+    val btnOk = stringResource(R.string.btn_ok)
+    val btnCancel = stringResource(R.string.btn_cancel)
 
     val filteredNotes = when (curFilter) {
         0 -> allNotes
@@ -134,9 +155,7 @@ fun BAPageScreen(
     val currentPage by rememberUpdatedState(page)
     val currentSelection by rememberUpdatedState(safeSelection)
 
-
     var showBrowserDialog by remember { mutableStateOf(false) }
-
 
     Scaffold(
         bottomBar = {
@@ -148,7 +167,7 @@ fun BAPageScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical =12.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     if (nPages > 1) {
                         Slider(
@@ -175,22 +194,22 @@ fun BAPageScreen(
                     ) {
                         NavButton(
                             icon = Icons.Default.Home,
-                            label = "Главная",
+                            label = navHome,
                             onClick = { onHome() }
                         )
                         NavButton(
                             icon = Icons.AutoMirrored.Filled.List,
-                            label = "Оглавление",
+                            label = navContents,
                             onClick = { onTable() }
                         )
                         NavButton(
                             icon = Icons.Default.Palette,
-                            label = "Цвет",
+                            label = navColor,
                             onClick = { showColorChoicer = true }
                         )
                         NavButton(
                             icon = Icons.AutoMirrored.Filled.LibraryBooks,
-                            label = "Книги",
+                            label = navBooks,
                             onClick = { onList() }
                         )
                         Surface(
@@ -250,13 +269,13 @@ fun BAPageScreen(
                                 .fillMaxWidth()
                                 .appendTextContextMenuComponents {
                                     separator()
-                                    item(key = "ShowColor", label = "Изменить цвет") {
+                                    item(key = "ShowColor", label = menuChangeColor) {
                                         showColorChoicer = true
                                         close()
                                     }
                                     if (safeSelection.end != safeSelection.start) {
                                         separator()
-                                        item(key = "AddSticker", label = "Добавить стикер") {
+                                        item(key = "AddSticker", label = menuAddSticker) {
                                             if (currentColor != Color.Transparent) {
                                                 val newStyles = addSticker(
                                                     currentPage.styles,
@@ -277,7 +296,7 @@ fun BAPageScreen(
                                             close()
                                         }
                                         separator()
-                                        item(key = "DeleteSticker", label = "Убрать стикер") {
+                                        item(key = "DeleteSticker", label = menuRemoveSticker) {
                                             val newStyles = cutSticker(currentPage.styles, currentSelection)
                                             onChangeStyle(
                                                 PageWithStyles(
@@ -291,22 +310,22 @@ fun BAPageScreen(
                                             close()
                                         }
                                         separator()
-                                        item(key = "AddNote", label = "Добавить заметку") {
+                                        item(key = "AddNote", label = menuAddNote) {
                                             showNoteState = 1
                                             close()
                                         }
                                         separator()
-                                        item(key = "ChooseNote", label = "Выбрать заметку") {
+                                        item(key = "ChooseNote", label = menuChooseNote) {
                                             showNoteState = 2
                                             close()
                                         }
                                         separator()
-                                        item(key = "AddBrowserLink", label = "Добавить ссылку из браузера") {
+                                        item(key = "AddBrowserLink", label = menuAddBrowserLink) {
                                             showBrowserDialog = true
                                             close()
                                         }
                                         separator()
-                                        item(key = "DeleteNote", label = "Убрать заметку") {
+                                        item(key = "DeleteNote", label = menuRemoveNote) {
                                             val newStyles = deleteNote(currentPage.styles, currentSelection) { id ->
                                                 onDeleteNote(id)
                                             }
@@ -316,7 +335,9 @@ fun BAPageScreen(
                                                     currentPage.number,
                                                     currentPage.text,
                                                     newStyles,
-                                                    currentPage.images))
+                                                    currentPage.images
+                                                )
+                                            )
                                             close()
                                         }
                                     }
@@ -337,13 +358,15 @@ fun BAPageScreen(
             if (showNoteState == 1) {
                 AlertDialog(
                     onDismissRequest = { showNoteState = 0 },
-                    title = { Text("Заметка") },
+                    title = { Text(dialogNoteTitle) },
                     text = {
                         OutlinedTextField(
                             value = noteText,
                             onValueChange = { noteText = it },
-                            label = { Text("Текст") },
-                            modifier = Modifier.fillMaxWidth().height(200.dp),
+                            label = { Text(labelText) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
                             maxLines = Int.MAX_VALUE,
                             singleLine = false,
                         )
@@ -356,10 +379,13 @@ fun BAPageScreen(
                                 noteText = ""
                                 showNoteState = 0
                             }
-                        }) { Text("OK") }
+                        }) { Text(btnOk) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { noteText = ""; showNoteState = 0 }) { Text("Отмена") }
+                        TextButton(onClick = {
+                            noteText = ""
+                            showNoteState = 0
+                        }) { Text(btnCancel) }
                     }
                 )
             }
@@ -367,7 +393,7 @@ fun BAPageScreen(
             if (showNoteState == 2) {
                 AlertDialog(
                     onDismissRequest = { showNoteState = 0 },
-                    title = { Text("Заметки") },
+                    title = { Text(dialogNotesTitle) },
                     text = {
                         NoteChoicer(
                             elements = filteredNotes,
@@ -384,19 +410,20 @@ fun BAPageScreen(
                                 onChangeStyle(PageWithStyles(page.id, page.number, page.text, newStyles, page.images))
                                 noteChosen = null
                             }
-                        }) { Text("OK") }
+                        }) { Text(btnOk) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { noteText = ""; showNoteState = 0 }) { Text("Отмена") }
+                        TextButton(onClick = {
+                            noteText = ""
+                            showNoteState = 0
+                        }) { Text(btnCancel) }
                     }
                 )
             }
 
             if (showBrowserDialog) {
                 BrowserDialog(
-                    quit = {
-                        showBrowserDialog = false
-                    },
+                    quit = { showBrowserDialog = false },
                     complete = { url ->
                         val newStyles = addSticker(
                             page.styles,
@@ -421,16 +448,16 @@ fun BAPageScreen(
             if (showColorChoicer) {
                 AlertDialog(
                     onDismissRequest = { showColorChoicer = false },
-                    title = { Text("Цвет") },
+                    title = { Text(dialogColorTitle) },
                     text = { ColorChoicer(curColor) { colorChosen = it } },
                     confirmButton = {
                         Button(onClick = {
                             onChangeColor(colorChosen)
                             showColorChoicer = false
-                        }) { Text("OK") }
+                        }) { Text(btnOk) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showColorChoicer = false }) { Text("Отмена") }
+                        TextButton(onClick = { showColorChoicer = false }) { Text(btnCancel) }
                     }
                 )
             }

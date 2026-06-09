@@ -45,11 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.component.BookDialog
 
@@ -66,12 +68,13 @@ fun BABookDetailScreen(
     } else 0f
     var bookToEdit by remember { mutableStateOf<Book?>(null) }
     var isAuthor by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Детали книги",
+                        stringResource(R.string.screen_book_detail_title),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -79,7 +82,7 @@ fun BABookDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.nav_back)
                         )
                     }
                 },
@@ -118,7 +121,10 @@ fun BABookDetailScreen(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                             lineHeight = 32.sp,
-                            modifier = Modifier.clickable{isAuthor = false; bookToEdit = book}
+                            modifier = Modifier.clickable {
+                                isAuthor = false
+                                bookToEdit = book
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -139,7 +145,10 @@ fun BABookDetailScreen(
                                 fontStyle = FontStyle.Italic,
                                 fontFamily = FontFamily.Serif,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.clickable{isAuthor = true; bookToEdit = book}
+                                modifier = Modifier.clickable {
+                                    isAuthor = true
+                                    bookToEdit = book
+                                }
                             )
                         }
 
@@ -151,7 +160,7 @@ fun BABookDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Прогресс чтения",
+                                    text = stringResource(R.string.label_reading_progress),
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -174,7 +183,7 @@ fun BABookDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Страница ${book.lastPage} из ${book.pages.size}",
+                                text = stringResource(R.string.label_page_of, book.lastPage, book.pages.size),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -200,7 +209,7 @@ fun BABookDetailScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Продолжить чтение",
+                                text = stringResource(R.string.btn_continue_reading),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontSize = 16.sp
                             )
@@ -223,7 +232,7 @@ fun BABookDetailScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Страницы",
+                        text = stringResource(R.string.label_pages),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -281,7 +290,7 @@ fun BABookDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     item.styles.sortedBy { it.textRange.start }.forEach { style ->
-                                        if(style.originalStyle?.backgroundColor != null) {
+                                        if (style.originalStyle?.backgroundColor != null) {
                                             Box(
                                                 modifier = Modifier
                                                     .width(6.dp)
@@ -312,7 +321,7 @@ fun BABookDetailScreen(
                                 modifier = Modifier.padding(start = 8.dp)
                             ) {
                                 Text(
-                                    text = "Текущая",
+                                    text = stringResource(R.string.label_current),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onTertiary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -327,26 +336,22 @@ fun BABookDetailScreen(
             }
         }
     }
+
     bookToEdit?.let { book ->
         if (!isAuthor) {
             BookDialog(
                 currentTitle = book.name,
-                onDismissRequest = {
-                    bookToEdit = null
-                },
+                onDismissRequest = { bookToEdit = null },
                 onConfirm = { newName ->
                     onUpdate(book.copy(name = newName))
                     bookToEdit = null
                 },
                 false
             )
-        }
-        else{
+        } else {
             BookDialog(
                 currentTitle = book.author,
-                onDismissRequest = {
-                    bookToEdit = null
-                },
+                onDismissRequest = { bookToEdit = null },
                 onConfirm = { newAuthor ->
                     onUpdate(book.copy(author = newAuthor))
                     bookToEdit = null

@@ -1,6 +1,5 @@
 package com.example.mainprojectkt.presentation.ui.screen
 
-import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,11 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.example.mainprojectkt.data.model.User
-import org.mindrot.jbcrypt.BCrypt
-
+import com.example.mainprojectkt.R
 
 @Composable
 fun BALoginScreen(
@@ -38,18 +36,30 @@ fun BALoginScreen(
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+
+    val errorIncompleteData = stringResource(R.string.error_incomplete_data)
+    val errorWrongPassword = stringResource(R.string.error_wrong_password)
+    val errorEmailNotFound = stringResource(R.string.error_email_not_found)
+    val errorAlreadyLoggedIn = stringResource(R.string.error_already_logged_in)
+    val labelEmail = stringResource(R.string.label_email)
+    val labelPassword = stringResource(R.string.label_password)
+    val descHidePassword = stringResource(R.string.desc_hide_password)
+    val descShowPassword = stringResource(R.string.desc_show_password)
+    val navHome = stringResource(R.string.nav_home)
+    val btnLogin = stringResource(R.string.btn_login)
+
     Scaffold(
         bottomBar = {
-            Column() {
-                Button({onBack()}) {
+            Column {
+                Button({ onBack() }) {
                     Icon(
                         Icons.Default.Home,
-                        "На главную"
+                        navHome
                     )
                 }
             }
         }
-    ) {padding ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,20 +67,20 @@ fun BALoginScreen(
         ) {
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it},
-                label = { Text("Почта") },
+                onValueChange = { email = it },
+                label = { Text(labelEmail) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it},
-                label = { Text("Пароль") },
+                onValueChange = { password = it },
+                label = { Text(labelPassword) },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
+                            contentDescription = if (passwordVisible) descHidePassword else descShowPassword
                         )
                     }
                 },
@@ -79,22 +89,21 @@ fun BALoginScreen(
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 Button({
-                    if(email.isEmpty() || password.isEmpty()) {
-                        errorMessage = "Не все данные введены."
-                    }
-                    else{
-                        onLogin(email, password){result ->
+                    if (email.isEmpty() || password.isEmpty()) {
+                        errorMessage = errorIncompleteData
+                    } else {
+                        onLogin(email, password) { result ->
                             when (result) {
                                 "Password" -> {
-                                    errorMessage = "Пароль неверный."
+                                    errorMessage = errorWrongPassword
                                 }
                                 "Email" -> {
-                                    errorMessage = "Почта не найдена."
+                                    errorMessage = errorEmailNotFound
                                 }
-                                "Second" ->{
-                                    errorMessage = "Вы уже в данном аккаунте."
+                                "Second" -> {
+                                    errorMessage = errorAlreadyLoggedIn
                                 }
                                 else -> {
                                     onBack()
@@ -103,7 +112,7 @@ fun BALoginScreen(
                         }
                     }
                 }) {
-                    Text("Войти")
+                    Text(btnLogin)
                 }
             }
             Text(errorMessage)

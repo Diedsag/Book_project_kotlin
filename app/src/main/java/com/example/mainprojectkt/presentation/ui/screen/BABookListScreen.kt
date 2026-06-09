@@ -33,13 +33,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Book
 import com.example.mainprojectkt.presentation.ui.component.BookDialog
 import com.example.mainprojectkt.presentation.ui.component.SwipeToRevealCard
 import com.example.mainprojectkt.presentation.viewmodel.BookUiState
-
 
 @Composable
 fun BABookListScreen(
@@ -58,9 +59,9 @@ fun BABookListScreen(
                 Button(onClick = { onBack() }) {
                     Icon(
                         Icons.Default.Home,
-                        "На главную"
+                        stringResource(R.string.nav_home)
                     )
-                    Text(" На главную")
+                    Text(" " + stringResource(R.string.nav_home))
                 }
             }
         }
@@ -72,14 +73,14 @@ fun BABookListScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    "Список книг",
+                    stringResource(R.string.screen_books_title),
                     fontSize = 50.sp,
                     modifier = Modifier.padding(start = 16.dp)
                 )
                 IconButton(onClick = { onAdd() }) {
                     Icon(
                         Icons.Default.Add,
-                        "Добавить",
+                        stringResource(R.string.btn_add),
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -87,7 +88,7 @@ fun BABookListScreen(
 
             if (books.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("У вас пока нет книг", fontSize = 18.sp)
+                    Text(stringResource(R.string.info_no_books), fontSize = 18.sp)
                 }
             } else {
                 LazyColumn(modifier = Modifier.padding(top = 20.dp)) {
@@ -112,9 +113,7 @@ fun BABookListScreen(
                             is BookUiState.Success -> {
                                 SwipeToRevealCard(
                                     book = item.book,
-                                    onEdit = { book ->
-                                        bookToEdit = book
-                                    },
+                                    onEdit = { book -> bookToEdit = book },
                                     onDelete = onDelete
                                 ) {
                                     Card(
@@ -144,7 +143,7 @@ fun BABookListScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                                 Text(
-                                                    "Страниц: ${item.book.pages.size}",
+                                                    stringResource(R.string.label_pages_count, item.book.pages.size),
                                                     fontSize = 14.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -160,11 +159,11 @@ fun BABookListScreen(
                                             ) {
                                                 Icon(
                                                     Icons.Default.Bookmarks,
-                                                    "Подробнее",
+                                                    stringResource(R.string.btn_details),
                                                     modifier = Modifier.size(32.dp),
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
-                                                Text("Подробнее", fontSize = 12.sp)
+                                                Text(stringResource(R.string.btn_details), fontSize = 12.sp)
                                             }
                                         }
                                     }
@@ -176,12 +175,11 @@ fun BABookListScreen(
             }
         }
     }
+
     bookToEdit?.let { book ->
         BookDialog(
             currentTitle = book.name,
-            onDismissRequest = {
-                bookToEdit = null
-            },
+            onDismissRequest = { bookToEdit = null },
             onConfirm = { newName ->
                 onUpdate(book.copy(name = newName))
                 bookToEdit = null

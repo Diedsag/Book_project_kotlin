@@ -16,7 +16,6 @@ class TextStyleStrategy : ITextExtractionStrategy {
     private val textBuilder = StringBuilder()
     private val styleRanges = mutableListOf<StyleRange>()
     private var currentChunk: TextChunk? = null
-
     private var lastBaselineY: Float? = null
     private var lastEndX: Float? = null
     private var lastFontSize: Float = 12f
@@ -151,26 +150,23 @@ class TextStyleStrategy : ITextExtractionStrategy {
         val prevY = lastBaselineY ?: return "normal"
         val prevEndX = lastEndX ?: return "normal"
 
-        val domSize = dominantFontSize ?: currentFontSize
-        val isSmallEnough = when {
-            currentFontSize <= 8f -> true
-            currentFontSize > 12f -> false
-            else -> currentFontSize <= domSize * 0.75f
-        }
+        val refSize = dominantFontSize ?: lastFontSize
+
+        val isSmallEnough = currentFontSize <= 11f && currentFontSize <= refSize * 0.85f
         if (!isSmallEnough) return "normal"
 
         val yDiff = abs(currentBaselineY - prevY)
-        val onSameLine = yDiff <= lastFontSize * 0.3f
+        val onSameLine = yDiff <= refSize * 0.7f
         if (!onSameLine) return "normal"
 
         val horizontalGap = currentStartX - prevEndX
-        val immediatelyAfter = horizontalGap <= lastFontSize * 0.2f
+        val immediatelyAfter = horizontalGap <= refSize * 0.3f
         if (!immediatelyAfter) return "normal"
 
         val baselineShift = currentBaselineY - prevY
         return when {
-            baselineShift > currentFontSize * 0.2f -> "superscript"
-            baselineShift < -currentFontSize * 0.2f -> "subscript"
+            baselineShift > refSize * 0.15f -> "superscript"
+            baselineShift < -refSize * 0.10f -> "subscript"
             else -> "normal"
         }
     }

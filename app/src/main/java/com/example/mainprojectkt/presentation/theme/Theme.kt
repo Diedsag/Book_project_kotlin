@@ -1,5 +1,4 @@
 package com.example.mainprojectkt.presentation.theme
-
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -256,7 +255,7 @@ val unspecified_scheme = ColorFamily(
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
   val colorScheme = when {
@@ -277,4 +276,3 @@ fun AppTheme(
 }
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
-

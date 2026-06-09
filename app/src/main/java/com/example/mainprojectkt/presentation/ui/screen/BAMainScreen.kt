@@ -51,12 +51,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.data.model.User
 import com.example.mainprojectkt.presentation.theme.ThemeMode
 import kotlinx.coroutines.launch
@@ -80,19 +82,19 @@ fun BAMainScreen(
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             title = {
-                Text("Выход из аккаунта", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.dialog_logout_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             },
-            text = { Text("Вы действительно хотите выйти из системы?") },
+            text = { Text(stringResource(R.string.dialog_logout_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     onLogout()
                     showLogoutDialog = false
                 }) {
-                    Text("Выйти", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_logout), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) { Text("Отмена") }
+                TextButton(onClick = { showLogoutDialog = false }) { Text(stringResource(R.string.btn_cancel)) }
             },
             shape = RoundedCornerShape(16.dp),
             containerColor = MaterialTheme.colorScheme.surface,
@@ -113,37 +115,45 @@ fun BAMainScreen(
                 if (user == null) {
                     Button(
                         onClick = toLogin,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 12.dp)) {
-                            Icon(Icons.AutoMirrored.Filled.Login, contentDescription = "Вход", modifier = Modifier.padding(end = 8.dp))
-                            Text(text = "Вход", style = MaterialTheme.typography.labelLarge)
+                            Icon(Icons.AutoMirrored.Filled.Login, contentDescription = stringResource(R.string.btn_sign_in), modifier = Modifier.padding(end = 8.dp))
+                            Text(text = stringResource(R.string.btn_sign_in), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = toRegister,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 12.dp)) {
-                            Icon(Icons.Default.AppRegistration, contentDescription = "Регистрация", modifier = Modifier.padding(end = 8.dp))
-                            Text(text = "Регистрация", style = MaterialTheme.typography.labelLarge)
+                            Icon(Icons.Default.AppRegistration, contentDescription = stringResource(R.string.btn_sign_up), modifier = Modifier.padding(end = 8.dp))
+                            Text(text = stringResource(R.string.btn_sign_up), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 } else {
                     Surface(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
                         shadowElevation = 4.dp,
                         tonalElevation = 2.dp
                     ) {
                         Text(
                             text = user.name,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp, horizontal = 16.dp),
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontFamily = FontFamily.Serif,
                                 fontStyle = FontStyle.Italic,
@@ -154,13 +164,15 @@ fun BAMainScreen(
                     }
                     Button(
                         onClick = { showLogoutDialog = true },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 12.dp)) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Выйти", modifier = Modifier.padding(end = 8.dp))
-                            Text(text = "Выйти", style = MaterialTheme.typography.labelLarge)
+                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = stringResource(R.string.desc_logout), modifier = Modifier.padding(end = 8.dp))
+                            Text(text = stringResource(R.string.btn_logout), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -172,7 +184,7 @@ fun BAMainScreen(
 
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     Text(
-                        text = "Тема оформления",
+                        text = stringResource(R.string.label_theme),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 4.dp),
@@ -197,9 +209,9 @@ fun BAMainScreen(
                             )
                             Text(
                                 text = when (theme) {
-                                    ThemeMode.SYSTEM -> "Системная"
-                                    ThemeMode.LIGHT -> "Светлая"
-                                    ThemeMode.DARK -> "Тёмная"
+                                    ThemeMode.SYSTEM -> stringResource(R.string.theme_system)
+                                    ThemeMode.LIGHT -> stringResource(R.string.theme_light)
+                                    ThemeMode.DARK -> stringResource(R.string.theme_dark)
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
@@ -217,11 +229,11 @@ fun BAMainScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text("Главная", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.screen_main_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Меню", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                            Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.nav_menu), tint = MaterialTheme.colorScheme.onPrimaryContainer)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -242,7 +254,7 @@ fun BAMainScreen(
             ) {
                 if (user != null) {
                     Text(
-                        text = "Добро пожаловать, ${user.name}!",
+                        text = stringResource(R.string.info_welcome_user, user.name),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -250,7 +262,7 @@ fun BAMainScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        text = "Продолжайте свое литературное путешествие",
+                        text = stringResource(R.string.info_literary_journey),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -263,32 +275,38 @@ fun BAMainScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(24.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(64.dp))
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "Моя библиотека", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.info_my_library), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Все ваши книги и прогресс чтения в одном месте", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f), textAlign = TextAlign.Center)
+                            Text(text = stringResource(R.string.info_library_description), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f), textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(24.dp))
                             Button(
                                 onClick = toBooks,
-                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimary, contentColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Icon(Icons.Default.Book, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "Перейти к списку книг", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(text = stringResource(R.string.btn_go_to_books), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
                         }
                     }
                 } else {
-                    Icon(Icons.Default.AutoStories, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(100.dp).padding(bottom = 16.dp))
-                    Text(text = "Добро пожаловать!", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground)
+                    Icon(Icons.Default.AutoStories, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 16.dp))
+                    Text(text = stringResource(R.string.info_welcome), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = "Чтобы получить доступ к своим книгам и заметкам, пожалуйста, авторизуйтесь в системе.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 16.dp), lineHeight = 24.sp)
+                    Text(text = stringResource(R.string.info_login_prompt), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 16.dp), lineHeight = 24.sp)
                     Spacer(modifier = Modifier.height(32.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -297,9 +315,9 @@ fun BAMainScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "Нажмите на кнопку меню слева ☰", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = stringResource(R.string.info_menu_hint), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "чтобы войти или зарегистрироваться", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                            Text(text = stringResource(R.string.info_menu_hint_2), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                         }
                     }
                 }

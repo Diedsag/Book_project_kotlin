@@ -28,12 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
+import com.example.mainprojectkt.R
 import com.example.mainprojectkt.domain.model.Book
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -89,7 +91,7 @@ fun SwipeToRevealCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Изменить",
+                    contentDescription = stringResource(R.string.btn_edit),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
                 )
@@ -104,7 +106,7 @@ fun SwipeToRevealCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Удалить",
+                    contentDescription = stringResource(R.string.btn_delete),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(28.dp)
                 )

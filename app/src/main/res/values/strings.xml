@@ -1,3 +1,111 @@
 <resources>
     <string name="app_name">Кот учёный</string>
+
+    <string name="screen_main_title">Главная</string>
+    <string name="screen_books_title">Список книг</string>
+    <string name="screen_book_detail_title">Детали книги</string>
+    <string name="screen_note_title">Заметка</string>
+    <string name="screen_notes_title">Заметки</string>
+    <string name="screen_scan_title">Сканирование книги</string>
+
+    <string name="nav_home">На главную</string>
+    <string name="nav_back">Назад</string>
+    <string name="nav_menu">Меню</string>
+    <string name="nav_contents">Оглавление</string>
+    <string name="nav_books">Книги</string>
+    <string name="nav_color">Цвет</string>
+
+    <string name="btn_login">Войти</string>
+    <string name="btn_register">Зарегистрироваться</string>
+    <string name="btn_sign_in">Вход</string>
+    <string name="btn_sign_up">Регистрация</string>
+    <string name="btn_logout">Выйти</string>
+    <string name="btn_add">Добавить</string>
+    <string name="btn_details">Подробнее</string>
+    <string name="btn_delete">Удалить</string>
+    <string name="btn_edit">Изменить</string>
+    <string name="btn_continue_reading">Продолжить чтение</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_cancel">Отмена</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_choose_pdf">Выбрать PDF файл</string>
+    <string name="btn_scan">Сканировать</string>
+    <string name="btn_add_link">Добавить ссылку</string>
+    <string name="btn_go_to_books">Перейти к списку книг</string>
+
+    <string name="label_email">Почта</string>
+    <string name="label_password">Пароль</string>
+    <string name="label_name">Имя</string>
+    <string name="label_repeat_password">Повторите пароль</string>
+    <string name="label_text">Текст</string>
+    <string name="label_note_text">Текст заметки</string>
+    <string name="label_author">Автор</string>
+    <string name="label_book_title">Название книги</string>
+    <string name="label_pages">Страницы</string>
+    <string name="label_pages_count">Страниц: %d</string>
+    <string name="label_current">Текущая</string>
+    <string name="label_reading_progress">Прогресс чтения</string>
+    <string name="label_page_of">Страница %1$d из %2$d</string>
+    <string name="label_theme">Тема оформления</string>
+    <string name="label_scan_mode">Режим сканирования:</string>
+    <string name="label_scan_format_doc">Формат документа</string>
+    <string name="label_scan_format_plain">Единый формат</string>
+
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+
+    <string name="desc_hide_password">Скрыть пароль</string>
+    <string name="desc_show_password">Показать пароль</string>
+    <string name="desc_logout">Выйти</string>
+
+    <string name="error_incomplete_data">Не все данные введены.</string>
+    <string name="error_wrong_password">Пароль неверный.</string>
+    <string name="error_email_not_found">Почта не найдена.</string>
+    <string name="error_already_logged_in">Вы уже в данном аккаунте.</string>
+    <string name="error_passwords_mismatch">Пароли не совпадают.</string>
+    <string name="error_password_no_letters">Пароль не содержит английских букв.</string>
+    <string name="error_password_no_digits">Пароль не содержит цифр.</string>
+    <string name="error_password_no_special">Пароль не содержит специальных символов.</string>
+    <string name="error_password_too_short">Длина пароля меньше 8 символов.</string>
+    <string name="error_invalid_email">Почта введена не корректна.</string>
+    <string name="error_email_registered">Почта уже зарегистрирована.</string>
+    <string name="hint_password_requirements">Требования к паролю: не менее 8 символов, наличие латинских символов, цифр и специальных символов</string>
+
+    <string name="info_no_books">У вас пока нет книг</string>
+    <string name="info_no_notes">Нет заметок для отображения</string>
+    <string name="info_welcome_user">Добро пожаловать, %1$s!</string>
+    <string name="info_literary_journey">Продолжайте свое литературное путешествие</string>
+    <string name="info_my_library">Моя библиотека</string>
+    <string name="info_library_description">Все ваши книги и прогресс чтения в одном месте</string>
+    <string name="info_welcome">Добро пожаловать!</string>
+    <string name="info_login_prompt">Чтобы получить доступ к своим книгам и заметкам, пожалуйста, авторизуйтесь в системе.</string>
+    <string name="info_menu_hint">Нажмите на кнопку меню слева ☰</string>
+    <string name="info_menu_hint_2">чтобы войти или зарегистрироваться</string>
+
+    <string name="menu_change_color">Изменить цвет</string>
+    <string name="menu_add_sticker">Добавить стикер</string>
+    <string name="menu_remove_sticker">Убрать стикер</string>
+    <string name="menu_add_note">Добавить заметку</string>
+    <string name="menu_choose_note">Выбрать заметку</string>
+    <string name="menu_add_browser_link">Добавить ссылку из браузера</string>
+    <string name="menu_remove_note">Убрать заметку</string>
+
+    <string name="dialog_logout_title">Выход из аккаунта</string>
+    <string name="dialog_logout_text">Вы действительно хотите выйти из системы?</string>
+    <string name="dialog_edit_author">Изменить автора</string>
+    <string name="dialog_edit_title">Изменить название</string>
+    <string name="dialog_note_title">Заметка</string>
+    <string name="dialog_notes_title">Заметки</string>
+    <string name="dialog_color_title">Цвет</string>
+    <string name="dialog_browser_title">Выберите страницу</string>
+    <string name="dialog_confirm_title">Подтверждение</string>
+    <string name="dialog_scan_mode_text">Режим сканирования: %1$s</string>
+    <string name="dialog_scan_start">Начать сканирование?</string>
+
+    <string name="filter_all">Все</string>
+    <string name="filter_current_book">Текущей книги</string>
+
+    <string name="desc_scan_format_doc">Сохраняет форматирование: шрифты, цвета, размеры, индексы</string>
+    <string name="desc_scan_format_plain">Извлекает только текст без форматирования</string>
 </resources>
